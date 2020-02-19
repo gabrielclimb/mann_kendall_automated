@@ -1,11 +1,4 @@
-
-from __future__ import division
 import numpy as np
-import pandas as pd
-from datetime import datetime
-import glob
-import os
-
 from scipy.stats import norm
 
 
@@ -60,7 +53,8 @@ def mk_test(x, kendall_dist, alpha=0.05):
         tp = np.zeros(unique_x.shape)
         for i in range(len(unique_x)):
             tp[i] = sum(x == unique_x[i])
-        var_s = (n * (n - 1) * (2 * n + 5) - np.sum(tp * (tp - 1) * (2 * tp + 5))) / 18
+        var_s = (n * (n - 1) * (2 * n + 5) - np.sum(
+            tp * (tp - 1) * (2 * tp + 5))) / 18
 
     if s > 0:
         z = (s - 1) / np.sqrt(var_s)
@@ -70,7 +64,7 @@ def mk_test(x, kendall_dist, alpha=0.05):
         z = 0
 
     # ----------------
-    # Arcadis section
+    # Enviroment Company section
     # ----------------
     # Coefficient of Variation
     cv = np.std(x, ddof=1) / np.mean(x)
@@ -104,70 +98,3 @@ def mk_test(x, kendall_dist, alpha=0.05):
                 trend = "Decreasing"
 
     return trend, round(s, 4), round(cv, 2), round(cf, 3)
-
-
-def gera_xlsx(file_name):
-
-    # nao alterar esse arquivo de entrada
-    kendall_dist = pd.read_csv("kendall_dist.csv", index_col=0, sep=";")
-
-    df = pd.read_excel(file_name, header=None, index_col=None)
-    df = df.replace("ND", 0.5)
-    df2 = df.T
-    df2 = df2.rename(columns=df2.iloc[0])
-    df2 = df2.drop(0, axis=0)
-    df2.columns.values[0] = "well"
-    df2.columns.values[1] = "Date"
-
-    # checa o numero de amostras por poço, se for menos do que 4 é ignorado.
-    wells = pd.DataFrame(df2.well.value_counts() > 4).reset_index()
-
-    # df2 = df2.set_index("well")
-
-    wells = wells[wells.well == True].iloc[:, 0]
-
-    colunas = df2.columns[2:]
-
-    df2 = df2.replace("<", "")
-
-    results = pd.DataFrame()
-    array = []
-    for w in wells:
-        df_temp = df2[df2.well == w]
-        print(w)
-        for c in colunas:
-            print(c)
-            valores = df_temp.loc[:, c].fillna(0).values
-            trend, s, cv, cf = mk_test(valores, kendall_dist)
-            array = [w, c, trend, s, cv, cf]
-            print(array)
-            results = results.append([array], ignore_index=True)
-
-    results.columns = ['Well', 'Analise', 'Trend', "Mann-Kendall Statistic (S)",
-                       'Coefficient of Variation', 'Confidence Factor']
-
-    today = datetime.today().strftime("%Y_%m_%d")
-    output_name = f"Mann_Kendall_{today}.xlsx"
-
-    results.to_excel(output_name, index=False, sheet_name="mann_kendall")
-
-
-def main():
-
-    file = glob.glob(os.getcwd() + "/*.xlsx")
-    x = 0
-    while x != "sair":
-        count = 0
-        for f in file:
-            print(f"{count}: Arquivo {f}")
-            count += 1
-
-        x = input(f"Escollha um arquivo pelo numero ou digite sair.\n")
-        if x.isdigit():
-            gera_xlsx(file[int(x)])
-        else:
-            x = "sair"
-
-
-if __name__ == '__main__':
-    main()
