@@ -7,6 +7,7 @@ import pandas as pd
 from datetime import datetime
 
 from utils.mann_kendall import mk_test
+from utils.fix_string import string_to_float, get_columns_with_incorrect_values
 
 
 def gera_xlsx(file_name):
@@ -20,14 +21,17 @@ def gera_xlsx(file_name):
     df_tranposto.columns.values[0] = "well"
     df_tranposto.columns.values[1] = "Date"
 
+    if get_columns_with_incorrect_values(df_tranposto):
+        print('You should fix this values firts')
+        exit()
+
+
     # checa o numero de amostras por poço, se for menos do que 4 é ignorado.
     wells = pd.DataFrame(df_tranposto.well.value_counts() > 4).reset_index()
 
     wells = wells[wells.well == True].iloc[:, 0]
 
     colunas = df_tranposto.columns[2:]
-
-    df_tranposto = df_tranposto.replace("<", "")
 
     results = pd.DataFrame()
     array = []
@@ -36,11 +40,16 @@ def gera_xlsx(file_name):
         print(w)
         for c in colunas:
             print(c)
-            valores = df_temp.loc[:, c].fillna(0).values
-            trend, s, cv, cf = mk_test(valores, KENDALL_DIST)
-            array = [w, c, trend, s, cv, cf]
-            print(array)
-            results = results.append([array], ignore_index=True)
+
+            try:
+                valores = df_temp.loc[:, c].apply(
+                    string_to_float).fillna(0).values
+                trend, s, cv, cf = mk_test(valores, KENDALL_DIST)
+                array = [w, c, trend, s, cv, cf]
+                print(array)
+                results = results.append([array], ignore_index=True)
+            except TypeError:
+                raise TypeError(f'incorrect values: {valores}')
 
     results.columns = ['Well', 'Analise', 'Trend',
                        "Mann-Kendall Statistic (S)",
