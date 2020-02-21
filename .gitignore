@@ -1,3 +1,4 @@
 debug.py
-UQSA_STATS.xlsx
-__pycache__
+*.xlsx
+*__pycache__
+*.vscode
