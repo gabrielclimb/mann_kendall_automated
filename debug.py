@@ -6,8 +6,8 @@ import glob
 import pandas as pd
 from datetime import datetime
 
-from utils.mann_kendall import mk_test
-from utils.fix_string import string_to_float, string_test
+from mann_kendall_automated.utils.mann_kendall import mk_test
+from mann_kendall_automated.utils.fix_string import string_to_float, string_test
 
 
 # nao alterar esse arquivo de entrada
