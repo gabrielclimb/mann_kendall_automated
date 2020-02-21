@@ -2,9 +2,11 @@
 from __future__ import division
 
 import os
+from datetime import datetime
+from random import randint
+
 import glob
 import pandas as pd
-from datetime import datetime
 
 from utils.mann_kendall import mk_test
 from utils.fix_string import string_to_float, get_columns_with_incorrect_values
@@ -12,7 +14,7 @@ from utils.fix_string import string_to_float, get_columns_with_incorrect_values
 
 def gera_xlsx(file_name):
 
-    # nao alterar esse arquivo de entrada
+    # keep it
     KENDALL_DIST = pd.read_csv("utils/kendall_dist.csv", index_col=0, sep=";")
 
     df = pd.read_excel(file_name, header=None, index_col=0)
@@ -26,7 +28,7 @@ def gera_xlsx(file_name):
         exit()
 
 
-    # checa o numero de amostras por poço, se for menos do que 4 é ignorado.
+    # check the number of samples per well, if less than 5, its ignore.
     wells = pd.DataFrame(df_tranposto.well.value_counts() > 4).reset_index()
 
     wells = wells[wells.well == True].iloc[:, 0]
@@ -57,7 +59,7 @@ def gera_xlsx(file_name):
                        'Confidence Factor']
 
     today = datetime.today().strftime("%Y_%m_%d")
-    output_name = f"output_tables/Mann_Kendall_{today}.xlsx"
+    output_name = f"output_tables/Mann_Kendall_{today}_{randint(1000, 5000)}.xlsx"
 
     results.to_excel(output_name, index=False, sheet_name="mann_kendall")
 
@@ -66,17 +68,17 @@ def main():
 
     file = glob.glob(os.getcwd() + "/input_tables" + "/*.xlsx")
     x = 0
-    while x != "sair":
+    while x != "exit":
         count = 0
         for f in file:
-            print(f"{count}: Arquivo {f}")
+            print(f"{count}: File {f}")
             count += 1
 
-        x = input(f"Escollha um arquivo pelo numero ou digite sair.\n")
+        x = input(f"Choose a file by number or type exit.\n")
         if x.isdigit():
             gera_xlsx(file[int(x)])
         else:
-            x = "sair"
+            x = "exit"
 
 
 if __name__ == '__main__':
