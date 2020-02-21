@@ -5,9 +5,8 @@ The core part of code was made by [Sat Kumar Tomer](http://vsp.pnnl.gov/help/Vsa
 
 The code is in **`generate_kendall_stats.py`**, a example input table is **`input_tables/tabela_exemplo_input.xlsx`** and **`utils/kendall_dist.csv`** is a table with value for normal curve that was extract from GSI cause it was a little different from those values usually used with numpy
 
-To run the script you should be inside of `mann_kendall_automated` folder.
-
 To run directly in command line:
 ```bash
-python3 generate_kendall_stats.py
+python3 main.py
 ```
+gs

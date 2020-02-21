@@ -2,7 +2,7 @@ import os
 
 import glob
 
-from .generate_excel import generate_xlsx
+from mann_kendall_automated.generate_excel import generate_xlsx
 
 
 def main():

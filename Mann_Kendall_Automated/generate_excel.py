@@ -6,14 +6,17 @@ from random import randint
 
 import pandas as pd
 
-from utils.mann_kendall import mk_test
-from utils.fix_string import string_to_float, get_columns_with_incorrect_values
+from .utils.mann_kendall import mk_test
+from .utils.fix_string import string_to_float,\
+    get_columns_with_incorrect_values
 
 
 def generate_xlsx(file_name):
 
     # keep it
-    KENDALL_DIST = pd.read_csv("utils/kendall_dist.csv", index_col=0, sep=";")
+    KENDALL_DIST = pd.read_csv(
+        "Mann_Kendall_Automated/utils/file/kendall_dist.csv",
+        index_col=0, sep=";")
 
     df = pd.read_excel(file_name, header=None, index_col=0)
     df = df.replace("ND", 0.5)
