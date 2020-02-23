@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from __future__ import division
 
 from datetime import datetime
@@ -6,6 +6,7 @@ from random import randint
 
 import pandas as pd
 
+from .utils.progress_bar import print_progress_bar
 from .utils.mann_kendall import mk_test
 from .utils.fix_string import string_to_float,\
     get_columns_with_incorrect_values
@@ -37,19 +38,25 @@ def generate_xlsx(file_name):
 
     results = pd.DataFrame()
     array = []
+    complete_progress = []
+    print_progress_bar(0, len(wells), prefix='Progress:',
+                       suffix='Complete', length=50)
     for w in wells:
+        complete_progress.append(w)
+        progress = len(complete_progress)
+        print_progress_bar(progress + 1, len(wells), prefix='Progress:',
+                           suffix='Complete', length=50)
         df_temp = df_tranposto[df_tranposto.well == w]
-        print(w)
         for c in colunas:
-            print(c)
-
             try:
-                valores = df_temp.loc[:, c].apply(
-                    string_to_float).fillna(0).values
-                trend, s, cv, cf = mk_test(valores, KENDALL_DIST)
-                array = [w, c, trend, s, cv, cf]
-                print(array)
-                results = results.append([array], ignore_index=True)
+                if df_temp.loc[:, c].count() > 3:
+                    valores = df_temp.loc[:, c].apply(
+                        string_to_float).fillna(0).values
+                    trend, s, cv, cf = mk_test(valores, KENDALL_DIST)
+                    array = [w, c, trend, s, cv, cf]
+                    results = results.append([array], ignore_index=True)
+                else:
+                    continue
             except TypeError:
                 raise TypeError(f'incorrect values: {valores}')
 
