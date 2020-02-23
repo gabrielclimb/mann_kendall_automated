@@ -12,7 +12,7 @@ from .utils.fix_string import string_to_float,\
     get_columns_with_incorrect_values
 
 
-def generate_xlsx(file_name):
+def generate_mann_kendall(file_name):
 
     # keep it
     KENDALL_DIST = pd.read_csv(
@@ -27,7 +27,7 @@ def generate_xlsx(file_name):
 
     if get_columns_with_incorrect_values(df_tranposto):
         print('You should fix this values firts')
-        exit()
+        raise TypeError
 
     # check the number of samples per well, if less than 5, its ignore.
     wells = pd.DataFrame(df_tranposto.well.value_counts() > 4).reset_index()
@@ -57,15 +57,23 @@ def generate_xlsx(file_name):
                 else:
                     continue
             except TypeError:
+                valores = df_temp.loc[:, c].apply(
+                        string_to_float).fillna(0).values
                 raise TypeError(f'incorrect values: {valores}')
 
     results.columns = ['Well', 'Analise', 'Trend',
                        "Mann-Kendall Statistic (S)",
                        'Coefficient of Variation',
                        'Confidence Factor']
+    return results
 
+
+def generate_xlsx(file_name):
     today = datetime.today().strftime("%Y_%m_%d")
     random_number = randint(1000, 5000)
     output_name = f"output_tables/Mann_Kendall_{today}_{random_number}.xlsx"
-
+    try:
+        results = generate_mann_kendall(file_name)
+    except TypeError:
+        exit()
     results.to_excel(output_name, index=False, sheet_name="mann_kendall")
