@@ -16,4 +16,4 @@ class TestGenerateMannKendall:
                    'Coefficient of Variation', 'Confidence Factor']
         for i in range(len(columns)):
             assert self.result.columns[i] == columns[i]
-    
+

@@ -12,6 +12,15 @@ from .utils.fix_string import string_to_float,\
     get_columns_with_incorrect_values
 
 
+def transpose_dataframe(file_name):
+    df = pd.read_excel(file_name, header=None, index_col=0)
+    df = df.replace("ND", 0.5)
+    df_tranposto = df.T
+    df_tranposto.columns.values[0] = "well"
+    df_tranposto.columns.values[1] = "Date"
+    return df_tranposto
+
+
 def generate_mann_kendall(file_name):
 
     # keep it
@@ -19,11 +28,7 @@ def generate_mann_kendall(file_name):
         "Mann_Kendall_Automated/utils/file/kendall_dist.csv",
         index_col=0, sep=";")
 
-    df = pd.read_excel(file_name, header=None, index_col=0)
-    df = df.replace("ND", 0.5)
-    df_tranposto = df.T
-    df_tranposto.columns.values[0] = "well"
-    df_tranposto.columns.values[1] = "Date"
+    df_tranposto = transpose_dataframe(file_name)
 
     if get_columns_with_incorrect_values(df_tranposto):
         print('You should fix this values firts')
