@@ -38,13 +38,12 @@ def generate_xlsx(file_name):
 
     results = pd.DataFrame()
     array = []
-    complete_progress = []
     print_progress_bar(0, len(wells), prefix='Progress:',
                        suffix='Complete', length=50)
+    count = 0
     for w in wells:
-        complete_progress.append(w)
-        progress = len(complete_progress)
-        print_progress_bar(progress + 1, len(wells), prefix='Progress:',
+        count += 1
+        print_progress_bar(count, len(wells), prefix='Progress:',
                            suffix='Complete', length=50)
         df_temp = df_tranposto[df_tranposto.well == w]
         for c in colunas:
