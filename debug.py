@@ -7,11 +7,15 @@ import pandas as pd
 from datetime import datetime
 
 from mann_kendall_automated.utils.mann_kendall import mk_test
-from mann_kendall_automated.utils.fix_string import string_to_float, string_test
+from mann_kendall_automated.utils.fix_string import string_to_float,\
+    string_test
 
 
 # nao alterar esse arquivo de entrada
-KENDALL_DIST = pd.read_csv("utils/kendall_dist.csv", index_col=0, sep=";")
+KENDALL_DIST = pd.read_csv(
+    "mann_kendall_automated/utils/file/kendall_dist.csv",
+    index_col=0,
+    sep=";")
 
 file = glob.glob(os.getcwd() + "/input_tables" + "/*.xlsx")
 
