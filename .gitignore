@@ -2,3 +2,6 @@ debug.py
 *.xlsx
 *__pycache__
 *.vscode
+*.DS_Store
+*.coverage
+*.pytest_cache
