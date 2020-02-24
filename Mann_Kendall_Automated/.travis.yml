@@ -1,8 +1,9 @@
+language: python
 python:
-     # current default Python on Travis CI
-    - "3.7"
-  install:
-    - pip install -r requirements.txt
-  # command to run tests
-  script:
-    - pytest mann_kendall_automated/tests
+    # current default Python on Travis CI
+  - "3.7"
+install:
+  - pip install -r requirements.txt
+# command to run tests
+script:
+  - pytest mann_kendall_automated/tests
