@@ -53,9 +53,9 @@ def generate_mann_kendall(file_name):
         df_temp = df_tranposto[df_tranposto.well == w]
         for c in colunas:
             try:
-                if df_temp.loc[:, c].count() > 3:
+                if df_temp.loc[:, c].dropna().count() > 3:
                     valores = df_temp.loc[:, c].apply(
-                        string_to_float).fillna(0).values
+                        string_to_float).dropna().values
                     trend, s, cv, cf = mk_test(valores, KENDALL_DIST)
                     array = [w, c, trend, s, cv, cf]
                     results = results.append([array], ignore_index=True)
