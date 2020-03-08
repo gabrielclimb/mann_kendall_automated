@@ -76,7 +76,8 @@ def generate_mann_kendall(file_name):
 def generate_xlsx(file_name):
     today = datetime.today().strftime("%Y_%m_%d")
     random_number = randint(1000, 5000)
-    output_name = f"output_tables/Mann_Kendall_{today}_{random_number}.xlsx"
+    new_name = file_name.split("/")[-1].split('.')[0]
+    output_name = f"output_tables/{new_name}_{today}_{random_number}.xlsx"
     try:
         results = generate_mann_kendall(file_name)
     except TypeError:
