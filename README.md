@@ -10,5 +10,4 @@ To run directly in command line:
 python3 main.py
 ```
 
-The result will be saved in **`output_tables/`** with follow format:
-**`filename_NowDate_RandomNumber`**
+The result will be saved in **`output_tables/`** with follow format: *`filename_NowDate_RandomNumber.xlsx`*
