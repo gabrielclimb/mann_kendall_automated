@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 def string_to_float(x):
     if type(x) == str:
         return float(x.replace("<", "").strip())
