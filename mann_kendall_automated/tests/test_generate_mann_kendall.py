@@ -1,10 +1,11 @@
 import pytest
 from .context import generate_mann_kendall
-
+import os
 
 class TestGenerateMannKendall:
 
-    file = r'mann_kendall_automated/tests/files/example_input.xlsx'
+    file = 'mann_kendall_automated/tests/files/example_input.xlsx'
+    print(os.listdir())
     result = generate_mann_kendall(file)
 
     def test_size(self):
