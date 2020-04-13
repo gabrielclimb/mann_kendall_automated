@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.stats import norm
 
 
 def mk_test(x, kendall_dist, alpha=0.05):
