@@ -4,7 +4,7 @@ from .context import generate_mann_kendall
 
 class TestGenerateMannKendall:
 
-    file = 'mann_kendall_automated/tests/files/example_input.xlsx'
+    file = r'mann_kendall_automated/tests/files/example_input.xlsx'
     result = generate_mann_kendall(file)
 
     def test_size(self):
