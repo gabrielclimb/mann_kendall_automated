@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gabrielclimb/mann_kendall_automated.svg?branch=master)](https://travis-ci.org/gabrielclimb/mann_kendall_automated)
+
 # Mann Kendall Automated
 
 The idea of this project is automated the Mann Kendall Statistc for Well, commonly use in environment engineering and geology.
