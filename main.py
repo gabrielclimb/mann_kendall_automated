@@ -15,7 +15,7 @@ def main():
             print(f"{count}: File {f}")
             count += 1
 
-        x = input(f"Choose a file by number or type exit.\n")
+        x = input("Choose a file by number or type exit.\n")
         if x.isdigit():
             generate_xlsx(file[int(x)])
             print("\n")
