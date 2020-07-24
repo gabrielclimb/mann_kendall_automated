@@ -113,7 +113,7 @@ def graphs_option(results, dataframe: pd.DataFrame):
 def get_desired_component(results: pd.DataFrame, desired_wells: list):
     results_filter_by_well = results[results.Well.isin(desired_wells)]
     desired_component = st.selectbox(
-        "Select Well", results_filter_by_well.Analise.unique())
+        "Select Component", results_filter_by_well.Analise.unique())
     return desired_component
 
 
