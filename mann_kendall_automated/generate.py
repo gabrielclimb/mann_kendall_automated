@@ -74,13 +74,13 @@ def generate_mann_kendall(file_name):
     return results, df_tranposto
 
 
-def generate_xlsx(file_name):
-    today = datetime.today().strftime("%Y_%m_%d")
-    random_number = randint(1000, 5000)
-    new_name = file_name.split("/")[-1].split('.')[0]
-    output_name = f"output_tables/{new_name}_{today}_{random_number}.xlsx"
-    try:
-        results = generate_mann_kendall(file_name)
-    except TypeError:
-        exit()
-    results.to_excel(output_name, index=False, sheet_name="mann_kendall")
+# def generate_xlsx(file_name):
+#     today = datetime.today().strftime("%Y_%m_%d")
+#     random_number = randint(1000, 5000)
+#     new_name = file_name.split("/")[-1].split('.')[0]
+#     output_name = f"output_tables/{new_name}_{today}_{random_number}.xlsx"
+#     try:
+#         results = generate_mann_kendall(file_name)
+#     except TypeError:
+#         exit()
+#     results.to_excel(output_name, index=False, sheet_name="mann_kendall")

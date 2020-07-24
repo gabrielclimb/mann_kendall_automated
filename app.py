@@ -101,9 +101,11 @@ def graphs_option(results, dataframe: pd.DataFrame):
 
         df_filtered = fillna(df_filtered, desired_component)
 
+        name = ', '.join(desired_wells)
+
         f = px.line(df_filtered.reset_index(drop=True).fillna(method='pad'),
                     x="Date", y=desired_component, color='well', log_y=True,
-                    title=f'{desired_wells} x {desired_component}')
+                    title=f'{name} x {desired_component}')
 
         st.plotly_chart(f, use_container_width=True)
 
