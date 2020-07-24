@@ -15,6 +15,7 @@ def main():
     function responsable for run streamlit app
     """
     st.header(body='Mann Kendall Solution')
+
     file_upload = st.sidebar.file_uploader(label="Upload Excel File",
                                            encoding=None)
 
@@ -28,13 +29,16 @@ def main():
         if page == "Export":
             pass
         elif page == "Graphs":
-            desired_well = st.selectbox("Select Well",
+            desired_well = st.selectbox("Selecdft Well",
                                         results.Well.unique())
             if desired_well:
                 results_filter_by_well = results.query(
                     f"Well=='{desired_well}'")
                 desired_component = st.selectbox(
                     "Select Well", results_filter_by_well.Analise.unique())
+
+                df.query(f"well=='{desired_well}'")[
+                    ['Date', desired_component]].sort_values('Date')
 #         if check_excel_structure(df):
 #             kml = create_kml_from_excel(df)
 #             map_plot(df)
