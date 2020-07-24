@@ -127,7 +127,6 @@ def filter_well_component(df_transposed: pd.DataFrame,
     df_filtered[desired_component] = df_filtered[
         desired_component].apply(float)
     df_filtered = df_filtered.reset_index(drop=True)
-    print(df_filtered)
     return df_filtered
 
 
