@@ -70,7 +70,7 @@ def generate_mann_kendall(file_name):
                        "Mann-Kendall Statistic (S)",
                        'Coefficient of Variation',
                        'Confidence Factor']
-    return results
+    return results, df_tranposto
 
 
 def generate_xlsx(file_name):
