@@ -24,6 +24,7 @@ def transpose_dataframe(file_name):
 def generate_mann_kendall(file_name):
 
     # keep it
+    # todo: it need to be fixed
     KENDALL_DIST = pd.read_csv(
         "mann_kendall_automated/utils/file/kendall_dist.csv",
         index_col=0, sep=";")
