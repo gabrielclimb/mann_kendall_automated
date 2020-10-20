@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
-from datetime import datetime
-from random import randint
-
 import pandas as pd
 
 from .utils.progress_bar import print_progress_bar
@@ -22,11 +19,6 @@ def transpose_dataframe(file_name):
 
 
 def generate_mann_kendall(file_name):
-
-    # keep it
-    KENDALL_DIST = pd.read_csv(
-        "mann_kendall_automated/utils/file/kendall_dist.csv",
-        index_col=0, sep=";")
 
     df_tranposto = transpose_dataframe(file_name)
 
@@ -56,7 +48,7 @@ def generate_mann_kendall(file_name):
                 if df_temp.loc[:, c].dropna().count() > 3:
                     valores = df_temp.loc[:, c].apply(
                         string_to_float).dropna().values
-                    trend, s, cv, cf = mk_test(valores, KENDALL_DIST)
+                    trend, s, cv, cf = mk_test(valores)
                     array = [w, c, trend, s, cv, cf]
                     results = results.append([array], ignore_index=True)
                 else:
@@ -70,7 +62,6 @@ def generate_mann_kendall(file_name):
                        "Mann-Kendall Statistic (S)",
                        'Coefficient of Variation',
                        'Confidence Factor']
-
     return results, df_tranposto
 
 

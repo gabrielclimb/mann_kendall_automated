@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import norm
 
 
-def mk_test(x, kendall_dist, alpha=0.05):
+def mk_test(x, alpha=0.05):
     """
     This function is derived from code originally posted by Sat Kumar Tomer
     (satkumartomer@gmail.com)
@@ -56,11 +56,12 @@ def mk_test(x, kendall_dist, alpha=0.05):
         var_s = (n * (n - 1) * (2 * n + 5) - np.sum(
             tp * (tp - 1) * (2 * tp + 5))) / 18
 
+    # standardized test statistic Z
     if s > 0:
         z = (s - 1) / np.sqrt(var_s)
     elif s < 0:
         z = (s + 1) / np.sqrt(var_s)
-    else:  # s == 0:
+    elif s == 0:
         z = 0
 
     # ----------------
@@ -68,22 +69,13 @@ def mk_test(x, kendall_dist, alpha=0.05):
     # ----------------
     # Coefficient of Variation
     cv = np.std(x, ddof=1) / np.mean(x)
-
+    # calculate the p_value
+    p = 2 * (1 - norm.cdf(abs(z)))  # two tail test
+    h = abs(z) > norm.ppf(1 - alpha / 2)
     # ----------------
     # Confidence Factor
-    ken_LINHA = int(abs(s))  # COLUNA
-    ken_COLUNA = len(x) - 4  # LINHA
-    normal_value = float(kendall_dist.iloc[ken_LINHA, ken_COLUNA])
-    # this 99 is cause of distribution
-    if normal_value == 99:
-        cf = 0.99
-    else:
-        cf = 1 - normal_value
-    # ----------------
-
-    # # calculate the p_value
-    # p = 2 * (1 - norm.cdf(abs(z)))  # two tail test
-    # h = abs(z) > norm.ppf(1 - alpha / 2)
+    cf = 1 - p
+    # # ----------------
 
     if cf < 0.9:
         if s <= 0 and cv < 1:
