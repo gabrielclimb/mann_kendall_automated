@@ -19,24 +19,28 @@ def main():
     """
     st.header(body='Mann Kendall Solution')
 
-    file_upload = st.sidebar.file_uploader(label="Upload Excel File",
-                                           encoding=None,
-                                           type=["xlsx", "xls"])
+    first_selector = st.sidebar.selectbox("1 - Choose a options",
+                                          ["Process Data"])
+    if first_selector == "Process Data":
 
-    if file_upload:
-        results, df = cache_generate_mann_kendall(file_upload)
+        file_upload = st.file_uploader(label="Upload Excel File",
+                                       encoding=None,
+                                       type=["xlsx", "xls"])
 
-        st.sidebar.markdown(get_table_download_link(results),
-                            unsafe_allow_html=True)
+        if file_upload:
+            results, df = cache_generate_mann_kendall(file_upload)
 
-        page = st.sidebar.selectbox("Choose a options",
-                                    ["", "Export", "Graphs"])
-        st.write("Choose a option in left side")
+            st.markdown(get_table_download_link(results),
+                        unsafe_allow_html=True)
 
-        if page == "Export":
-            export_option(results, df)
-        elif page == "Graphs":
-            graphs_option(results, df)
+            page = st.sidebar.selectbox("2 - Choose a options",
+                                        ["Online Plots"])
+            st.write("Choose a option in left side")
+
+            if page == "Online Plots":
+                plot_online(results, df)
+            elif page == "Export Plots":
+                pass
 
 
 @st.cache
@@ -82,11 +86,7 @@ def to_excel(dataframe: pd.DataFrame):
     return processed_data
 
 
-def export_option(results, dataframe: pd.DataFrame):
-    print('Not Working Yet')
-
-
-def graphs_option(results, dataframe: pd.DataFrame):
+def plot_online(results, dataframe: pd.DataFrame):
     desired_wells = st.multiselect(
         'Select Well',
         results.Well.unique())
@@ -98,16 +98,24 @@ def graphs_option(results, dataframe: pd.DataFrame):
 
         df_filtered = filter_well_component(
             dataframe, desired_wells, desired_component)
-
-        df_filtered = fillna(df_filtered, desired_component)
+        # import ipdb; ipdb.set_trace()
+        df_filtered = df_filtered.dropna()
+        # df_filtered = fillna(df_filtered, desired_component)
 
         name = ', '.join(desired_wells)
 
-        f = px.line(df_filtered.reset_index(drop=True).fillna(method='pad'),
-                    x="Date", y=desired_component, color='well', log_y=True,
-                    title=f'{name} x {desired_component}')
+        f = px.line(
+            df_filtered.reset_index(drop=True).fillna(method='pad'),
+            x="Date", y=desired_component, color='well', log_y=True,
+            title=f'{name} x {desired_component}',
+            # width=300, height=600
+        )
 
         st.plotly_chart(f, use_container_width=True)
+
+
+def plots_export():
+    pass
 
 
 def get_desired_component(results: pd.DataFrame, desired_wells: list):
