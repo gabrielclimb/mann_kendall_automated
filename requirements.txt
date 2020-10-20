@@ -542,7 +542,7 @@ send2trash==1.5.0 \
 six==1.15.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.3.0" \
     --hash=sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced \
     --hash=sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259
-streamlit==0.69.2; python_version >= "3.6" \
+streamlit==0.67.1; python_version >= "3.6" \
     --hash=sha256:96ba01710f09b9df2d8df17e2e5845a13fa543420fb9cdf8073335baec2a7f1d
 terminado==0.9.1; python_version >= "3.6" \
     --hash=sha256:c55f025beb06c2e2669f7ba5a04f47bb3304c30c05842d4981d8f0fc9ab3b4e3 \
