@@ -12,35 +12,34 @@ import plotly.express as px
 
 from mann_kendall_automated.generate import generate_mann_kendall
 
+st.set_option('deprecation.showfileUploaderEncoding', False)
+
 
 def main():
     """
     function responsable for run streamlit app
     """
-    st.header(body='Mann Kendall Solution')
+    st.title(body='Mann Kendall Solution')
 
-    first_selector = st.sidebar.selectbox("1 - Choose a options",
-                                          ["Process Data"])
-    if first_selector == "Process Data":
+    file_upload = st.sidebar.file_uploader(label="Upload Excel File",
+                                           encoding=None,
+                                           type=["xlsx", "xls"])
 
-        file_upload = st.file_uploader(label="Upload Excel File",
-                                       encoding=None,
-                                       type=["xlsx", "xls"])
+    if file_upload:
 
-        if file_upload:
-            results, df = cache_generate_mann_kendall(file_upload)
+        results, df = cache_generate_mann_kendall(file_upload)
 
-            st.markdown(get_table_download_link(results),
-                        unsafe_allow_html=True)
+        st.sidebar.markdown(get_table_download_link(results),
+                            unsafe_allow_html=True)
 
-            page = st.sidebar.selectbox("2 - Choose a options",
-                                        ["Online Plots"])
-            st.write("Choose a option in left side")
+        page = st.sidebar.selectbox("2 - Choose a options",
+                                    ["", "Online Plots"])
+        st.write("Choose a option in left side")
 
-            if page == "Online Plots":
-                plot_online(results, df)
-            elif page == "Export Plots":
-                pass
+        if page == "Online Plots":
+            plot_online(results, df)
+        elif page == "Export Plots":
+            pass
 
 
 @st.cache
@@ -98,7 +97,6 @@ def plot_online(results, dataframe: pd.DataFrame):
 
         df_filtered = filter_well_component(
             dataframe, desired_wells, desired_component)
-        # import ipdb; ipdb.set_trace()
         df_filtered = df_filtered.dropna()
         # df_filtered = fillna(df_filtered, desired_component)
 
