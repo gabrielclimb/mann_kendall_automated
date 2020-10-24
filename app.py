@@ -32,19 +32,13 @@ def main():
         st.sidebar.markdown(get_table_download_link(results),
                             unsafe_allow_html=True)
 
-        page = st.sidebar.selectbox("2 - Choose a options",
-                                    ["", "Online Plots"])
-        st.write("Choose a option in left side")
+        plot_online(results, df)
 
-        if page == "Online Plots":
-            plot_online(results, df)
-        elif page == "Export Plots":
-            pass
 
 
 @st.cache
 def cache_generate_mann_kendall(file):
-    return generate_mann_kendall(file.read())
+    return generate_mann_kendall(file.getvalue())
 
 
 def get_table_download_link(dataframe: pd.DataFrame):
@@ -110,10 +104,6 @@ def plot_online(results, dataframe: pd.DataFrame):
         )
 
         st.plotly_chart(f, use_container_width=True)
-
-
-def plots_export():
-    pass
 
 
 def get_desired_component(results: pd.DataFrame, desired_wells: list):
