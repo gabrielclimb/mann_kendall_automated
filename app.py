@@ -104,7 +104,8 @@ def plot_online(results, dataframe: pd.DataFrame):
             df_filtered.reset_index(drop=True).fillna(method='pad'),
             x="Date", y=desired_component, color='well', log_y=log_scale,
             title=f'{name} x {desired_component}',
-            # width=300, height=600
+            # width=300, 
+            # height=600
         )
 
         st.plotly_chart(fig, use_container_width=True)
