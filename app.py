@@ -9,6 +9,7 @@ from io import BytesIO
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 from mann_kendall_automated.generate import generate_mann_kendall
 
@@ -93,17 +94,18 @@ def plot_online(results, dataframe: pd.DataFrame):
             dataframe, desired_wells, desired_component)
         df_filtered = df_filtered.dropna()
         # df_filtered = fillna(df_filtered, desired_component)
+        log_scale = choose_log_scale()
 
         name = ', '.join(desired_wells)
 
-        f = px.line(
+        fig = px.line(
             df_filtered.reset_index(drop=True).fillna(method='pad'),
-            x="Date", y=desired_component, color='well', log_y=True,
+            x="Date", y=desired_component, color='well', log_y=log_scale,
             title=f'{name} x {desired_component}',
             # width=300, height=600
         )
 
-        st.plotly_chart(f, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
 
 def get_desired_component(results: pd.DataFrame, desired_wells: list):
@@ -124,6 +126,13 @@ def filter_well_component(df_transposed: pd.DataFrame,
         desired_component].apply(float)
     df_filtered = df_filtered.reset_index(drop=True)
     return df_filtered
+
+
+def choose_log_scale():
+    log_scale = st.selectbox("Select Scale", ['Log', 'Linear'])
+    if log_scale == "Log":
+        return True
+    return False
 
 
 def fillna(df_filtered: pd.DataFrame, component: str):
