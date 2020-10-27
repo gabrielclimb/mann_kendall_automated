@@ -23,12 +23,13 @@ def transpose_dataframe(file_name):
 
 def generate_mann_kendall(file_name):
 
-    # keep it
+    # keep it 
     KENDALL_DIST = pd.read_csv(
         "mann_kendall_automated/utils/file/kendall_dist.csv",
         index_col=0, sep=";")
 
-    df_tranposto = transpose_dataframe(file_name)
+    df_tranposto = transpose_dataframe(
+        file_name)
 
     if get_columns_with_incorrect_values(df_tranposto):
         print('You should fix this values firts')
