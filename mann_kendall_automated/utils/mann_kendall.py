@@ -70,8 +70,8 @@ def mk_test(x, alpha=0.05):
     # Coefficient of Variation
     cv = np.std(x, ddof=1) / np.mean(x)
     # calculate the p_value
-    p = 2 * (1 - norm.cdf(abs(z)))  # two tail test
-    h = abs(z) > norm.ppf(1 - alpha / 2)
+    p = (1 - norm.cdf(abs(z)))  # one tail test
+    h = abs(z) > norm.ppf(1 - alpha)
     # ----------------
     # Confidence Factor
     cf = 1 - p
