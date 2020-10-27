@@ -20,6 +20,8 @@ def main():
     """
     function responsable for run streamlit app
     """
+    st.beta_set_page_config(page_title='Mann Kendall')
+
     st.title(body='Mann Kendall Solution')
 
     file_upload = st.sidebar.file_uploader(label="Upload Excel File",
