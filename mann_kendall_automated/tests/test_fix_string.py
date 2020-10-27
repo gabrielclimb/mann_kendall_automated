@@ -16,7 +16,7 @@ class TestFixString:
     string_wrong = 'test<'
 
     def test_string_to_float(self):
-        assert 2 == string_to_float(self.value_wrong)
+        assert string_to_float(self.value_wrong) == 2
         assert type(string_to_float(self.value_wrong)) == float
         with pytest.raises(ValueError):
             string_to_float(self.string_wrong)
