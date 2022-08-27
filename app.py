@@ -10,7 +10,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-from mann_kendall_automated.generate import generate_mann_kendall
+from src.generate import generate_mann_kendall
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
 
