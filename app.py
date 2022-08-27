@@ -9,34 +9,31 @@ from io import BytesIO
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
 from mann_kendall_automated.generate import generate_mann_kendall
 
-st.set_option('deprecation.showfileUploaderEncoding', False)
+st.set_option("deprecation.showfileUploaderEncoding", False)
 
 
-def main():
+def main() -> None:
     """
     function responsable for run streamlit app
     """
-    st.beta_set_page_config(page_title='Mann Kendall')
+    st.set_page_config("Mann Kendall Automated")
 
-    st.title(body='Mann Kendall Solution')
+    st.title(body="Mann Kendall Automated")
 
-    file_upload = st.sidebar.file_uploader(label="Upload Excel File",
-                                           encoding=None,
-                                           type=["xlsx", "xls"])
+    file_upload = st.sidebar.file_uploader(
+        label="Upload Excel File", type=["xlsx", "xls"]
+    )
 
     if file_upload:
 
         results, df = cache_generate_mann_kendall(file_upload)
 
-        st.sidebar.markdown(get_table_download_link(results),
-                            unsafe_allow_html=True)
+        st.sidebar.markdown(get_table_download_link(results), unsafe_allow_html=True)
 
         plot_online(results, df)
-
 
 
 @st.cache
@@ -44,7 +41,7 @@ def cache_generate_mann_kendall(file):
     return generate_mann_kendall(file.getvalue())
 
 
-def get_table_download_link(dataframe: pd.DataFrame):
+def get_table_download_link(dataframe: pd.DataFrame) -> str:
     """
     Generate a button to download a file
 
@@ -57,9 +54,11 @@ def get_table_download_link(dataframe: pd.DataFrame):
     val = to_excel(dataframe)
     b64 = base64.b64encode(val)
     # TODO: Create a random number as filename, check generate_xlsx
-    return ('<p style="text-align:center;">'
-            f'<a href="data:application/octet-stream;base64,{b64.decode()}" '
-            'download="mann_kendall.xlsx">Download Excel file</a></p>')
+    return (
+        '<p style="text-align:center;">'
+        f'<a href="data:application/octet-stream;base64,{b64.decode()}" '
+        'download="mann_kendall.xlsx">Download Excel file</a></p>'
+    )
     # decode b'abc' => abc)
 
 
@@ -75,36 +74,35 @@ def to_excel(dataframe: pd.DataFrame):
     """
 
     output = BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    dataframe.to_excel(writer, index=False, sheet_name='Sheet1')
+    writer = pd.ExcelWriter(output, engine="xlsxwriter")
+    dataframe.to_excel(writer, index=False, sheet_name="Sheet1")
     writer.save()
     processed_data = output.getvalue()
     return processed_data
 
 
-def plot_online(results, dataframe: pd.DataFrame):
-    desired_wells = st.multiselect(
-        'Select Well',
-        results.Well.unique())
+def plot_online(results, dataframe: pd.DataFrame) -> None:
+    desired_wells = st.multiselect("Select Well", results.Well.unique())
 
     if len(desired_wells):
 
-        desired_component = get_desired_component(
-            results, desired_wells)
+        desired_component = get_desired_component(results, desired_wells)
 
-        df_filtered = filter_well_component(
-            dataframe, desired_wells, desired_component)
+        df_filtered = filter_well_component(dataframe, desired_wells, desired_component)
         df_filtered = df_filtered.dropna()
         # df_filtered = fillna(df_filtered, desired_component)
         log_scale = choose_log_scale()
 
-        name = ', '.join(desired_wells)
+        name = ", ".join(desired_wells)
 
         fig = px.line(
-            df_filtered.reset_index(drop=True).fillna(method='pad'),
-            x="Date", y=desired_component, color='well', log_y=log_scale,
-            title=f'{name} x {desired_component}',
-            # width=300, 
+            df_filtered.reset_index(drop=True).fillna(method="pad"),
+            x="Date",
+            y=desired_component,
+            color="well",
+            log_y=log_scale,
+            title=f"{name} x {desired_component}",
+            # width=300,
             # height=600
         )
 
@@ -114,39 +112,38 @@ def plot_online(results, dataframe: pd.DataFrame):
 def get_desired_component(results: pd.DataFrame, desired_wells: list):
     results_filter_by_well = results[results.Well.isin(desired_wells)]
     desired_component = st.selectbox(
-        "Select Component", results_filter_by_well.Analise.unique())
+        "Select Component", results_filter_by_well.Analise.unique()
+    )
     return desired_component
 
 
-def filter_well_component(df_transposed: pd.DataFrame,
-                          desired_well: list, desired_component: str):
+def filter_well_component(
+    df_transposed: pd.DataFrame, desired_well: list, desired_component: str
+) -> pd.DataFrame:
 
     df_filtered = df_transposed[df_transposed.well.isin(desired_well)]
 
-    df_filtered = df_filtered[
-        ['well', 'Date', desired_component]].sort_values('Date')
-    df_filtered[desired_component] = df_filtered[
-        desired_component].apply(float)
+    df_filtered = df_filtered[["well", "Date", desired_component]].sort_values("Date")
+    df_filtered[desired_component] = df_filtered[desired_component].apply(float)
     df_filtered = df_filtered.reset_index(drop=True)
     return df_filtered
 
 
-def choose_log_scale():
-    log_scale = st.selectbox("Select Scale", ['Log', 'Linear'])
+def choose_log_scale() -> bool:
+    log_scale = st.selectbox("Select Scale", ["Log", "Linear"])
     if log_scale == "Log":
         return True
     return False
 
 
-def fillna(df_filtered: pd.DataFrame, component: str):
+def fillna(df_filtered: pd.DataFrame, component: str) -> pd.DataFrame:
     df_concat = pd.DataFrame()
     for well in df_filtered.well.unique():
-        df_temp = df_filtered.query(f"well=='{well}'").sort_values('Date')
-        df_temp[component] = df_temp[component].fillna(method='ffill',
-                                                       limit=1)
+        df_temp = df_filtered.query(f"well=='{well}'").sort_values("Date")
+        df_temp[component] = df_temp[component].fillna(method="ffill", limit=1)
         df_concat = pd.concat([df_temp, df_concat])
     return df_concat
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
