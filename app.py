@@ -15,7 +15,7 @@ from mann_kendall_automated.generate import generate_mann_kendall
 st.set_option("deprecation.showfileUploaderEncoding", False)
 
 
-def main():
+def main() -> None:
     """
     function responsable for run streamlit app
     """
@@ -41,7 +41,7 @@ def cache_generate_mann_kendall(file):
     return generate_mann_kendall(file.getvalue())
 
 
-def get_table_download_link(dataframe: pd.DataFrame):
+def get_table_download_link(dataframe: pd.DataFrame) -> str:
     """
     Generate a button to download a file
 
@@ -81,7 +81,7 @@ def to_excel(dataframe: pd.DataFrame):
     return processed_data
 
 
-def plot_online(results, dataframe: pd.DataFrame):
+def plot_online(results, dataframe: pd.DataFrame) -> None:
     desired_wells = st.multiselect("Select Well", results.Well.unique())
 
     if len(desired_wells):
@@ -119,7 +119,7 @@ def get_desired_component(results: pd.DataFrame, desired_wells: list):
 
 def filter_well_component(
     df_transposed: pd.DataFrame, desired_well: list, desired_component: str
-):
+) -> pd.DataFrame:
 
     df_filtered = df_transposed[df_transposed.well.isin(desired_well)]
 
@@ -129,14 +129,14 @@ def filter_well_component(
     return df_filtered
 
 
-def choose_log_scale():
+def choose_log_scale() -> bool:
     log_scale = st.selectbox("Select Scale", ["Log", "Linear"])
     if log_scale == "Log":
         return True
     return False
 
 
-def fillna(df_filtered: pd.DataFrame, component: str):
+def fillna(df_filtered: pd.DataFrame, component: str) -> pd.DataFrame:
     df_concat = pd.DataFrame()
     for well in df_filtered.well.unique():
         df_temp = df_filtered.query(f"well=='{well}'").sort_values("Date")
