@@ -6,7 +6,7 @@ The idea of this project is automated the Mann Kendall Statistc for Well, common
 The core part of code was made by [Sat Kumar Tomer](http://vsp.pnnl.gov/help/Vsample/Design_Trend_Mann_Kendall.htm) and also adapt from [GSI SpreadSheet ](https://www.gsi-net.com/en/software/free-software/gsi-mann-kendall-toolkit.html).
 
 ## How to use
- **MKA** is deployed at heroku ([https://mann-kendall.herokuapp.com/](https://mann-kendall.herokuapp.com/)), so you can use it for free. The input should be in the follow format:
+ **MKA** is deployed at [heroku](https://mann-kendall.herokuapp.com/) and [Streamlit Cloud](https://gabrielclimb-mann-kendall-automated-app-d8xqtm.streamlitapp.com/), so you can use it for free. The input should be in the follow format:
 
 |                   | Point Name 1 | Point name 2 |
 | ----------------- | :----------: | -----------: |
