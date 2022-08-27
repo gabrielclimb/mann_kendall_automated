@@ -20,11 +20,11 @@ If for any reason you want to run **MKA** locally you have to follow those steps
 
 1. Check if you have python in your pc: `python --version`
 2. Clone this repo : `git clone https://github.com/gabrielclimb/mann_kendall_automated.git`
-3. Set Up a local enviroment:
+3. Set Up a local enviroment using your terminal:
     ```bash
     pip install virtualenv
     virtualenv .venv # create virtual env
     source .venv/bin/activate # activate the virtualenv
     pip install -r requirements.txt # install MKA dependencies
     ```
-4. Run
+4. Run `streamlit run app.py`
