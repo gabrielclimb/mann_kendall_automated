@@ -1,19 +1,23 @@
 import pytest
 
-from .context import string_test, string_to_float,\
-    get_columns_with_incorrect_values, transpose_dataframe
+from .context import (
+    string_test,
+    string_to_float,
+    get_columns_with_incorrect_values,
+    transpose_dataframe,
+)
 
 
 class TestFixString:
-    PATH = 'mann_kendall_automated/tests/files/'
-    file = PATH + 'example_input.xlsx'
-    file_error = PATH + 'example_input_with_string.xlsx'
+    PATH = "src/tests/files/"
+    file = PATH + "example_input.xlsx"
+    file_error = PATH + "example_input_with_string.xlsx"
     df_error = transpose_dataframe(file_error)
     df_right = transpose_dataframe(file)
     value_right = "2"
-    string_right = 'test'
+    string_right = "test"
     value_wrong = "< 2"
-    string_wrong = 'test<'
+    string_wrong = "test<"
 
     def test_string_to_float(self):
         assert string_to_float(self.value_wrong) == 2
@@ -30,5 +34,3 @@ class TestFixString:
 
     def test_get_columns_with_right_values(self):
         assert get_columns_with_incorrect_values(self.df_right) is None
-
-
