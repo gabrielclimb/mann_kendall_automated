@@ -5,3 +5,4 @@ debug.py
 *.coverage
 *.pytest_cache
 venv/
+pytest-coverage.txt
