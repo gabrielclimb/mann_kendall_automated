@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import norm
 
 
-def mk_test(x, alpha=0.05):
+def mk_test(x: np.ndarray, alpha: float = 0.05) -> tuple[str, float, float, float]:
     """
     This function is derived from code originally posted by Sat Kumar Tomer
     (satkumartomer@gmail.com)
@@ -51,8 +51,8 @@ def mk_test(x, alpha=0.05):
         var_s = (n * (n - 1) * (2 * n + 5)) / 18
     else:  # there are some ties in data
         tp = np.zeros(unique_x.shape)
-        for i in range(len(unique_x)):
-            tp[i] = sum(x == unique_x[i])
+        for i, unique_val in enumerate(unique_x):
+            tp[i] = sum(x == unique_val)
         var_s = (n * (n - 1) * (2 * n + 5) - np.sum(tp * (tp - 1) * (2 * tp + 5))) / 18
 
     # standardized test statistic Z
@@ -70,7 +70,7 @@ def mk_test(x, alpha=0.05):
     cv = np.std(x, ddof=1) / np.mean(x)
     # calculate the p_value
     p = 1 - norm.cdf(abs(z))  # one tail test
-    h = abs(z) > norm.ppf(1 - alpha)
+    _ = abs(z) > norm.ppf(1 - alpha)
     # ----------------
     # Confidence Factor
     cf = 1 - p
