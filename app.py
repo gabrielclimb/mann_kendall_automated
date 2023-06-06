@@ -37,7 +37,7 @@ def main() -> None:
         plot_online(results, dataframe)
 
 
-@st.cache
+@st.cache_data
 def cache_generate_mann_kendall(file) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Caches the generate_mann_kendall function to avoid re-computation.
