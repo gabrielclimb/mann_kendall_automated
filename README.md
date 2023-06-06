@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/gabrielclimb/mann_kendall_automated.svg?branch=master)](https://travis-ci.org/gabrielclimb/mann_kendall_automated)
+[LINK](https://gabrielclimb-mann-kendall-automated-app-d8xqtm.streamlitapp.com/)
 
 # Mann Kendall Automated (MKA)
 
