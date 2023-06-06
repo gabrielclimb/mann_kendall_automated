@@ -1,8 +1,10 @@
+from typing import Tuple
+
 import numpy as np
 from scipy.stats import norm
 
 
-def mk_test(x: np.ndarray, alpha: float = 0.05) -> tuple[str, float, float, float]:
+def mk_test(x: np.ndarray, alpha: float = 0.05) -> Tuple[str, float, float, float]:
     """
     This function is derived from code originally posted by Sat Kumar Tomer
     (satkumartomer@gmail.com)
