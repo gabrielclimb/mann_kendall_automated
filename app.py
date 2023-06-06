@@ -5,7 +5,7 @@ __author__ = "Gabriel Barbosa Soares"
 
 import base64
 from io import BytesIO
-from typing import Tuple, List
+from typing import List, Tuple
 
 import pandas as pd
 import plotly.express as px
@@ -86,7 +86,7 @@ def to_excel(dataframe: pd.DataFrame) -> bytes:
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine="xlsxwriter")
     dataframe.to_excel(writer, index=False, sheet_name="Sheet1")
-    writer.save()
+    writer.close()
     processed_data = output.getvalue()
     return processed_data
 

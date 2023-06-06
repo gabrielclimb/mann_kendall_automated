@@ -1,14 +1,13 @@
 import os
 import sys
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-)  # noqa
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.utils.fix_string import (  # noqa
+# pylint: disable=unused-import
+from src.generate import generate_mann_kendall, transpose_dataframe
+from src.utils.fix_string import (
+    get_columns_with_incorrect_values,
     string_test,
     string_to_float,
-    get_columns_with_incorrect_values,
 )
-from src.utils.mann_kendall import mk_test  # noqa
-from src.generate import generate_mann_kendall, transpose_dataframe  # noqa
+from src.utils.mann_kendall import mk_test
