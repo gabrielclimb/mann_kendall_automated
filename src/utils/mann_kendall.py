@@ -53,8 +53,7 @@ def mk_test(x, alpha=0.05):
         tp = np.zeros(unique_x.shape)
         for i in range(len(unique_x)):
             tp[i] = sum(x == unique_x[i])
-        var_s = (n * (n - 1) * (2 * n + 5) - np.sum(
-            tp * (tp - 1) * (2 * tp + 5))) / 18
+        var_s = (n * (n - 1) * (2 * n + 5) - np.sum(tp * (tp - 1) * (2 * tp + 5))) / 18
 
     # standardized test statistic Z
     if s > 0:
@@ -70,7 +69,7 @@ def mk_test(x, alpha=0.05):
     # Coefficient of Variation
     cv = np.std(x, ddof=1) / np.mean(x)
     # calculate the p_value
-    p = (1 - norm.cdf(abs(z)))  # one tail test
+    p = 1 - norm.cdf(abs(z))  # one tail test
     h = abs(z) > norm.ppf(1 - alpha)
     # ----------------
     # Confidence Factor
@@ -81,7 +80,7 @@ def mk_test(x, alpha=0.05):
         if s <= 0 and cv < 1:
             trend = "Stable"
         else:
-            trend = 'No Trend'
+            trend = "No Trend"
     else:
         if cf <= 0.95:
             if s > 0:
