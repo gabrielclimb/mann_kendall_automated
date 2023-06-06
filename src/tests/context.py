@@ -11,4 +11,3 @@ from src.utils.fix_string import (
     string_to_float,
 )
 from src.utils.mann_kendall import mk_test
-from src.utils.progress_bar import print_progress_bar
