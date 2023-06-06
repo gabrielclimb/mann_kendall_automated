@@ -71,7 +71,9 @@ def generate_mann_kendall(file_name: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
                     valores = df_temp.loc[:, c].apply(string_to_float).dropna().values
                     trend, s, cv, cf = mk_test(valores)
                     array = [w, c, trend, s, cv, cf]
-                    results = pd.concat([results, pd.DataFrame([array])], ignore_index=True)
+                    results = pd.concat(
+                        [results, pd.DataFrame([array])], ignore_index=True
+                    )
                 else:
                     continue
             except TypeError:

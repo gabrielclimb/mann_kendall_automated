@@ -5,7 +5,7 @@ __author__ = "Gabriel Barbosa Soares"
 
 import base64
 from io import BytesIO
-from typing import Tuple, List
+from typing import List, Tuple
 
 import pandas as pd
 import plotly.express as px

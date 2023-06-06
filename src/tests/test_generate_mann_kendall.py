@@ -10,7 +10,7 @@ class TestGenerateMannKendall:
     result = generate_mann_kendall(file)
 
     def test_type(self):
-        assert type(self.result) == tuple
+        assert isinstance(self.result, tuple)
 
     def test_size(self):
         assert len(self.result[0]) == 146
@@ -24,5 +24,5 @@ class TestGenerateMannKendall:
             "Coefficient of Variation",
             "Confidence Factor",
         ]
-        for i in range(len(columns)):
-            assert self.result[0].columns[i] == columns[i]
+        for i, column in enumerate(columns):
+            assert self.result[0].columns[i] == column
