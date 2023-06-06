@@ -47,8 +47,10 @@ def generate_mann_kendall(file_name: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         raise TypeError
 
     # check the number of samples per well, if less than 5, its ignore.
-    wells = pd.DataFrame(df_tranposto.well.value_counts() > 4).reset_index()
 
+    wells = pd.DataFrame(df_tranposto.well.value_counts() > 4).reset_index()
+    wells.columns = ["index", "well"]
+    
     wells = wells[wells.well].iloc[:, 0]
 
     colunas = df_tranposto.columns[2:]
@@ -69,7 +71,7 @@ def generate_mann_kendall(file_name: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
                     valores = df_temp.loc[:, c].apply(string_to_float).dropna().values
                     trend, s, cv, cf = mk_test(valores)
                     array = [w, c, trend, s, cv, cf]
-                    results = results.append([array], ignore_index=True)
+                    results = pd.concat([results, pd.DataFrame([array])], ignore_index=True)
                 else:
                     continue
             except TypeError:
