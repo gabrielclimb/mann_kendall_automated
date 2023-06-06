@@ -50,7 +50,7 @@ def generate_mann_kendall(file_name: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     wells = pd.DataFrame(df_tranposto.well.value_counts() > 4).reset_index()
     wells.columns = ["index", "well"]
-    
+
     wells = wells[wells.well].iloc[:, 0]
 
     colunas = df_tranposto.columns[2:]
