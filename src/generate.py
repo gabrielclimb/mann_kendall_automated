@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
+import sys
+from datetime import datetime
+from random import randint
 from typing import Tuple
 
 import pandas as pd
@@ -91,13 +94,29 @@ def generate_mann_kendall(file_name: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     return results, df_tranposto
 
 
-# def generate_xlsx(file_name):
-#     today = datetime.today().strftime("%Y_%m_%d")
-#     random_number = randint(1000, 5000)
-#     new_name = file_name.split("/")[-1].split('.')[0]
-#     output_name = f"output_tables/{new_name}_{today}_{random_number}.xlsx"
-#     try:
-#         results = generate_mann_kendall(file_name)
-#     except TypeError:
-#         exit()
-#     results.to_excel(output_name, index=False, sheet_name="mann_kendall")
+def generate_xlsx(file_name: str) -> None:
+    """
+    Generates an Excel file (.xlsx) with the results of the Mann-Kendall test.
+
+    This function applies the Mann-Kendall test to the data in the input file
+    and outputs the results in an Excel file. The output file is named based on
+    the original file name, the current date, and a random number.
+
+    Args:
+        file_name (str): The path to the input file.
+
+    Raises:
+        TypeError: If the input file cannot be processed by generate_mann_kendall function.
+
+    Returns:
+        None
+    """
+    today = datetime.today().strftime("%Y_%m_%d")
+    random_number = randint(1000, 5000)
+    new_name = file_name.split("/")[-1].split(".")[0]
+    output_name = f"output_tables/{new_name}_{today}_{random_number}.xlsx"
+    try:
+        results: pd.DataFrame = generate_mann_kendall(file_name)
+    except TypeError:
+        sys.exit()
+    results.to_excel(output_name, index=False, sheet_name="mann_kendall")
