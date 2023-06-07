@@ -1,3 +1,7 @@
+<div style="text-align: center;">
+  <img src="docs/images/logo.jpg" alt="Logo" style="width: 300px; height: 300px;">
+</div>
+
 # Introducing Mann Kendall Automated (MKA): A Time-Saving Solution for Environmental Engineering and Geology
 
 If you're involved in environmental engineering or geology, you're likely familiar with the Mann-Kendall test. This statistic is frequently used to identify trends in datasets, particularly in the context of water resources. But as you also know, performing these calculations can be a complex and time-consuming process. That's where Mann Kendall Automated (MKA) comes in. MKA is an online solution that automates the Mann Kendall Statistic for wells, making your work faster and more efficient.
