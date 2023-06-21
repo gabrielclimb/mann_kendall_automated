@@ -12,7 +12,7 @@ MKA is a free online tool developed to make the Mann Kendall test more accessibl
 
 ## How to use MKA?
 
-Using MKA is simple and straightforward. The tool is deployed on [Streamlit Cloud](https://gabrielclimb-mann-kendall-automated-app-d8xqtm.streamlitapp.com/), meaning you can access it from anywhere, at any time, free of charge. All you need to provide is your data, formatted as follows:
+Using MKA is simple and straightforward. The tool is deployed on [Streamlit Cloud](https://gabrielclimb-mann-kendall-automated-app-d8xqtm.streamlit.app/), meaning you can access it from anywhere, at any time, free of charge. All you need to provide is your data, formatted as follows:
 
 |                   | Point Name 1 | Point name 2 |
 | ----------------- | :----------: | -----------: |
