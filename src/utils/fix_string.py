@@ -21,7 +21,7 @@ def string_to_float(x: Union[str, float]) -> float:
     return x
 
 
-def string_test(value: Union[str, float]) -> Optional[str]:
+def string_test(value: Union[str, float]):
     """
     Checks if a value can be converted to float.
 
@@ -29,7 +29,8 @@ def string_test(value: Union[str, float]) -> Optional[str]:
         value (Union[str, float]): The value to test.
 
     Returns:
-        Optional[str]: The original value if it cannot be converted to float, None otherwise.
+        Optional[str]: The original value if it cannot be converted to float,
+                       None otherwise.
     """
     try:
         float(value)
@@ -39,7 +40,7 @@ def string_test(value: Union[str, float]) -> Optional[str]:
         pass
 
 
-def get_columns_with_incorrect_values(df: pd.DataFrame) -> bool:
+def get_columns_with_incorrect_values(df: pd.DataFrame) -> Optional[bool]:
     """
     Finds columns in a DataFrame that contain incorrect values.
 
