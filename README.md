@@ -1,5 +1,5 @@
 <div style="text-align: center;">
-  <img src="docs/images/logo.jpg" alt="Logo" style="width: 300px; height: 300px;">
+  <img src="docs/images/logo.png" alt="Logo" style="width: 300px; height: 300px;">
 </div>
 
 # Introducing Mann Kendall Automated (MKA): A Time-Saving Solution for Environmental Engineering and Geology
