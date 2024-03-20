@@ -3,3 +3,6 @@ lint:
 
 test:
 	pytest --cache-clear --cov=src src/tests/
+
+app:
+	streamlit run app.py

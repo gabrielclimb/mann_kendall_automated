@@ -13,8 +13,6 @@ import streamlit as st
 
 from src.generate import generate_mann_kendall
 
-st.set_option("deprecation.showfileUploaderEncoding", False)
-
 
 def main() -> None:
     """
