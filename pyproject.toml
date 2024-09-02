@@ -1,0 +1,42 @@
+[project]
+name = "mann-kendall-automated"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Gabriel Barbosa Soares", email = "gabriel.soares@teya.com" },
+]
+dependencies = [
+    "streamlit>=1.38.0",
+    "xlrd>=2.0.1",
+    "xlsxwriter>=3.2.0",
+    "pandas>=2.2.2",
+    "scipy>=1.14.1",
+    "openpyxl>=3.1.5",
+    "plotly>=5.24.0",
+]
+readme = "README.md"
+requires-python = ">= 3.11"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pytest>=8.3.2",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.6.3",
+    "uv>=0.4.2",
+]
+
+[tool.rye.scripts]
+req = "uv pip compile pyproject.toml -o requirements.txt"
+stream = "streamlit run app.py"
+test = "pytest src/ --cov=src --cache-clear"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mann_kendall_automated"]
