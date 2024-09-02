@@ -3,7 +3,7 @@ name = "mann-kendall-automated"
 version = "0.1.0"
 description = "Add your description here"
 authors = [
-    { name = "Gabriel Barbosa Soares", email = "gabriel.soares@teya.com" },
+    { name = "Gabriel Barbosa Soares", email = "gabrielclimb@gmail.com" },
 ]
 dependencies = [
     "streamlit>=1.38.0",
