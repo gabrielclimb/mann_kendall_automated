@@ -25,6 +25,8 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via streamlit
+et-xmlfile==1.1.0
+    # via openpyxl
 gitdb==4.0.11
     # via gitpython
 gitpython==3.1.43
@@ -50,7 +52,10 @@ numpy==2.1.0
     # via pandas
     # via pyarrow
     # via pydeck
+    # via scipy
     # via streamlit
+openpyxl==3.1.5
+    # via mann-kendall-automated
 packaging==24.1
     # via altair
     # via streamlit
@@ -81,6 +86,8 @@ rich==13.8.0
 rpds-py==0.20.0
     # via jsonschema
     # via referencing
+scipy==1.14.1
+    # via mann-kendall-automated
 six==1.16.0
     # via python-dateutil
 smmap==5.0.1
