@@ -12,6 +12,7 @@ dependencies = [
     "pandas>=2.2.2",
     "scipy>=1.14.1",
     "openpyxl>=3.1.5",
+    "plotly>=5.24.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.11"
@@ -31,6 +32,7 @@ dev-dependencies = [
 
 [tool.rye.scripts]
 req = "uv pip compile pyproject.toml -o requirements.txt"
+stream = "streamlit run app.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true

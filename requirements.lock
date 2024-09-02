@@ -58,12 +58,15 @@ openpyxl==3.1.5
     # via mann-kendall-automated
 packaging==24.1
     # via altair
+    # via plotly
     # via streamlit
 pandas==2.2.2
     # via mann-kendall-automated
     # via streamlit
 pillow==10.4.0
     # via streamlit
+plotly==5.24.0
+    # via mann-kendall-automated
 protobuf==5.28.0
     # via streamlit
 pyarrow==17.0.0
@@ -95,6 +98,7 @@ smmap==5.0.1
 streamlit==1.38.0
     # via mann-kendall-automated
 tenacity==8.5.0
+    # via plotly
     # via streamlit
 toml==0.10.2
     # via streamlit
