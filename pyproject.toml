@@ -33,6 +33,7 @@ dev-dependencies = [
 [tool.rye.scripts]
 req = "uv pip compile pyproject.toml -o requirements.txt"
 stream = "streamlit run app.py"
+test = "pytest src/ --cov=src --cache-clear"
 
 [tool.hatch.metadata]
 allow-direct-references = true
