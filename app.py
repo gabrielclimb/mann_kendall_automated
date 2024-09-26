@@ -12,6 +12,7 @@ import plotly.express as px
 import streamlit as st
 
 from src.generate import generate_mann_kendall
+from src.utils.fix_string import get_columns_with_incorrect_values
 
 
 def main() -> None:
@@ -27,12 +28,24 @@ def main() -> None:
     )
 
     if file_upload:
-
-        results, dataframe = cache_generate_mann_kendall(file_upload)
-
-        st.sidebar.markdown(get_table_download_link(results), unsafe_allow_html=True)
-
-        plot_online(results, dataframe)
+        try:
+            results, dataframe = cache_generate_mann_kendall(file_upload)
+            
+            if get_columns_with_incorrect_values(dataframe):
+                st.warning("The input file contains some incorrect values. Please check and fix them for accurate results.")
+            
+            st.sidebar.markdown(get_table_download_link(results), unsafe_allow_html=True)
+            plot_online(results, dataframe)
+        except pd.errors.EmptyDataError:
+            st.error("The uploaded file is empty. Please upload a file with data.")
+        except pd.errors.ParserError:
+            st.error("Unable to parse the uploaded file. Please ensure it's a valid Excel file.")
+        except ValueError as ve:
+            st.error(f"Value Error: {str(ve)}")
+        except TypeError as te:
+            st.error(f"Type Error: {str(te)}. Please check your data types.")
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {str(e)}. Please try again or contact support.")
 
 
 @st.cache_data
@@ -82,14 +95,12 @@ def to_excel(dataframe: pd.DataFrame) -> bytes:
     """
 
     output = BytesIO()
-    writer = pd.ExcelWriter(output, engine="xlsxwriter")
-    dataframe.to_excel(writer, index=False, sheet_name="Sheet1")
-    writer.close()
-    processed_data = output.getvalue()
-    return processed_data
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        dataframe.to_excel(writer, index=False, sheet_name="Sheet1")
+    return output.getvalue()
 
 
-def plot_online(results, dataframe: pd.DataFrame) -> None:
+def plot_online(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
     """
     Plots the data online using Plotly.
 
