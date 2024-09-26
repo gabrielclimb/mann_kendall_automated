@@ -28,23 +28,24 @@ def transpose_dataframe(file_name: str) -> pd.DataFrame:
     return df_tranposto
 
 
-def generate_mann_kendall(file_name: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def generate_mann_kendall(file_content: bytes) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Generates the Mann Kendall test results and transposed DataFrame.
 
     Args:
-        file_name (str): Name of the file containing the DataFrame.
+        file_content (bytes): Content of the file containing the DataFrame.
 
     Returns:
         Tuple[pd.DataFrame, pd.DataFrame]: Tuple containing the results
             DataFrame and the transposed DataFrame.
     """
-
-    df_tranposto = transpose_dataframe(file_name)
+    try:
+        df_tranposto = transpose_dataframe(file_content)
+    except Exception as e:
+        raise ValueError(f"Error reading the Excel file: {str(e)}")
 
     if get_columns_with_incorrect_values(df_tranposto):
-        print("You should fix this values firts")
-        raise TypeError
+        raise ValueError("The input file contains incorrect values. Please fix them before proceeding.")
 
     # check the number of samples per well, if less than 5, its ignore.
 
