@@ -73,7 +73,7 @@ def mk_test(x: np.ndarray, alpha: float = 0.05) -> Tuple[str, float, float, floa
     # calculate the p_value
     p = 1 - norm.cdf(abs(z))  # one tail test
     _ = abs(z) > norm.ppf(1 - alpha)
-    # ----------------
+    # ----------------y
     # Confidence Factor
     cf = 1 - p
     # # ----------------
