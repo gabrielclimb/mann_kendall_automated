@@ -1,11 +1,14 @@
 # src/infrastructure/django/views.py
 import pandas as pd
 from asgiref.sync import async_to_sync
+from django.contrib.auth import authenticate
 from rest_framework import status, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from src.application.use_cases.perform_mann_kendall_analysis import (
     PerformMannKendallAnalysis,
 )
@@ -120,4 +123,24 @@ class AnalysisViewSet(viewsets.ModelViewSet):
                 }
                 for r in results
             ]
+        )
+
+
+class LoginView(APIView):
+    """
+    View para autenticação de usuários.
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response(
+            {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
         )

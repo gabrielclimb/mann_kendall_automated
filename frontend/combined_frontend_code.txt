@@ -1,0 +1,831 @@
+------
+./index.html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+------
+./tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+export default {
+    content: [
+        "./index.html",
+        "./src/**/*.{js,ts,jsx,tsx}",
+    ],
+    theme: {
+        extend: {
+            colors: {
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
+                primary: {
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
+                },
+                secondary: {
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
+                },
+                destructive: {
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))",
+                },
+                muted: {
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))",
+                },
+                accent: {
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))",
+                },
+                popover: {
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))",
+                },
+                card: {
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))",
+                },
+            },
+            borderRadius: {
+                lg: "var(--radius)",
+                md: "calc(var(--radius) - 2px)",
+                sm: "calc(var(--radius) - 4px)",
+            },
+        },
+    },
+    plugins: [],
+}------
+./eslint.config.js
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+
+export default tseslint.config(
+  { ignores: ['dist'] },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+    },
+  },
+)
+------
+./vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+})------
+./postcss.config.js
+export default {
+    plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+    },
+}------
+./src/App.tsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Navbar } from './components/layout/Navbar';
+import { HomePage } from './pages/HomePage';
+import { ProjectsPage } from './pages/ProjectsPage';
+import { AnalysisPage } from './pages/AnalysisPage';
+
+const queryClient = new QueryClient();
+
+function App() {
+    return (
+        <QueryClientProvider client={queryClient}>
+            <Router>
+                <div className="min-h-screen bg-gray-50">
+                    <Navbar />
+
+                    {/* Main Content */}
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <Routes>
+                            <Route path="/" element={<HomePage />} />
+                            <Route path="/projects" element={<ProjectsPage />} />
+                            <Route path="/analysis" element={<AnalysisPage />} />
+                        </Routes>
+                    </main>
+                </div>
+            </Router>
+            <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+    );
+}
+
+export default App;------
+./src/main.tsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+------
+./src/utils/cn.ts
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs))
+}------
+./src/components/ui/alert.tsx
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "../../utils/cn"
+
+const alertVariants = cva(
+    "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
+    {
+        variants: {
+            variant: {
+                default: "bg-background text-foreground",
+                destructive:
+                    "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+            },
+        },
+        defaultVariants: {
+            variant: "default",
+        },
+    }
+)
+
+const Alert = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
+>(({ className, variant, ...props }, ref) => (
+    <div
+        ref={ref}
+        role="alert"
+        className={cn(alertVariants({ variant }), className)}
+        {...props}
+    />
+))
+Alert.displayName = "Alert"
+
+const AlertTitle = React.forwardRef<
+    HTMLParagraphElement,
+    React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+    <h5
+        ref={ref}
+        className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+        {...props}
+    />
+))
+AlertTitle.displayName = "AlertTitle"
+
+const AlertDescription = React.forwardRef<
+    HTMLParagraphElement,
+    React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+    <div
+        ref={ref}
+        className={cn("text-sm [&_p]:leading-relaxed", className)}
+        {...props}
+    />
+))
+AlertDescription.displayName = "AlertDescription"
+
+export { Alert, AlertTitle, AlertDescription }------
+./src/components/layout/Navbar.tsx
+import { Home, FileSpreadsheet, Camera, Settings, TrendingUp } from 'lucide-react';
+
+import { NavLink } from '../common/NavLink';
+
+export const Navbar = () => {
+    return (
+        <nav className="bg-white shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between h-16">
+                    <div className="flex">
+                        {/* Logo */}
+                        <div className="flex items-center">
+                            <TrendingUp className="h-8 w-8 text-blue-600" />
+                            <span className="ml-2 text-xl font-bold text-gray-900">MKA</span>
+                        </div>
+
+                        {/* Navigation Links */}
+                        <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                            <NavLink to="/">
+                                <Home className="h-5 w-5 mr-1" />
+                                Home
+                            </NavLink>
+                            <NavLink to="/projects">
+                                <FileSpreadsheet className="h-5 w-5 mr-1" />
+                                Projects
+                            </NavLink>
+                            <NavLink to="/analysis">
+                                <Camera className="h-5 w-5 mr-1" />
+                                Analysis
+                            </NavLink>
+                        </div>
+                    </div>
+
+                    {/* Settings */}
+                    <div className="flex items-center">
+                        <button className="p-2 rounded-full text-gray-500 hover:text-gray-600">
+                            <Settings className="h-6 w-6" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+};------
+./src/components/features/home/QuickActionCard.tsx
+import { Link } from 'react-router-dom';
+
+interface QuickActionCardProps {
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    href: string;
+}
+
+export const QuickActionCard = ({ title, description, icon, href }: QuickActionCardProps) => (
+    <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="p-5">
+            <div className="flex items-center">
+                <div className="flex-shrink-0">{icon}</div>
+                <div className="ml-5">
+                    <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+                    <p className="mt-1 text-sm text-gray-500">{description}</p>
+                </div>
+            </div>
+        </div>
+        <div className="bg-gray-50 px-5 py-3">
+            <Link
+                to={href}
+                className="text-sm font-medium text-blue-600 hover:text-blue-500"
+            >
+                Get started →
+            </Link>
+        </div>
+    </div>
+);------
+./src/components/common/NavLink.tsx
+import { Link, useLocation } from 'react-router-dom';
+
+interface NavLinkProps {
+    to: string;
+    children: React.ReactNode;
+}
+
+export const NavLink = ({ children, to }: NavLinkProps) => {
+    const location = useLocation();
+    const isActive = location.pathname === to;
+
+    return (
+        <Link
+            to={to}
+            className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 ${isActive
+                    ? 'border-blue-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                }`}
+        >
+            {children}
+        </Link>
+    );
+};------
+./src/vite-env.d.ts
+/// <reference types="vite/client" />
+------
+./src/hooks/useApi.ts
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { projectsApi, datasetsApi, analysisApi, Project, Dataset, AnalysisResult } from '../services/api';
+
+// Projects hooks
+export const useProjects = () => {
+    return useQuery<Project[]>({
+        queryKey: ['projects'],
+        queryFn: projectsApi.getAll
+    });
+};
+
+export const useProject = (id: string) => {
+    return useQuery<Project>({
+        queryKey: ['projects', id],
+        queryFn: () => projectsApi.getById(id),
+        enabled: !!id
+    });
+};
+
+export const useCreateProject = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: projectsApi.create,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+        }
+    });
+};
+
+export const useUpdateProject = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Partial<Project> }) =>
+            projectsApi.update(id, data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            queryClient.invalidateQueries({ queryKey: ['projects', variables.id] });
+        }
+    });
+};
+
+export const useDeleteProject = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: projectsApi.delete,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+        }
+    });
+};
+
+// Datasets hooks
+export const useProjectDatasets = (projectId: string) => {
+    return useQuery<Dataset[]>({
+        queryKey: ['datasets', projectId],
+        queryFn: () => datasetsApi.getByProject(projectId),
+        enabled: !!projectId
+    });
+};
+
+export const useUploadDataset = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ projectId, name, file }: { projectId: string; name: string; file: File }) =>
+            datasetsApi.upload(projectId, name, file),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['datasets', variables.projectId] });
+        }
+    });
+};
+
+export const useAnalyzeDataset = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: datasetsApi.analyze,
+        onSuccess: (_, datasetId) => {
+            queryClient.invalidateQueries({ queryKey: ['analyses', datasetId] });
+        }
+    });
+};
+
+// Analysis hooks
+export const useDatasetAnalyses = (datasetId: string) => {
+    return useQuery<AnalysisResult[]>({
+        queryKey: ['analyses', datasetId],
+        queryFn: () => analysisApi.getByDataset(datasetId),
+        enabled: !!datasetId
+    });
+};------
+./src/pages/AnalysisPage.tsx
+// src/pages/AnalysisPage.tsx
+import React, { useState } from 'react';
+import { FileSpreadsheet } from 'lucide-react';
+import { useProjects, useUploadDataset, useAnalyzeDataset } from '../hooks/useApi';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+export const AnalysisPage = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const { data: projects } = useProjects();
+    const uploadDataset = useUploadDataset();
+    const analyzeDataset = useAnalyzeDataset();
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+
+        const droppedFile = e.dataTransfer.files[0];
+        if (isValidFileType(droppedFile)) {
+            setFile(droppedFile);
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (selectedFile && isValidFileType(selectedFile)) {
+            setFile(selectedFile);
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!file || !projects?.[0]) return;
+
+        try {
+            // Upload the dataset
+            const dataset = await uploadDataset.mutateAsync({
+                projectId: projects[0].id,
+                name: file.name,
+                file: file
+            });
+
+            // Start analysis
+            await analyzeDataset.mutateAsync(dataset.id);
+
+            // Clear the file
+            setFile(null);
+        } catch (error) {
+            console.error('Upload failed:', error);
+        }
+    };
+
+    const isValidFileType = (file: File) => {
+        const validTypes = [
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ];
+        return validTypes.includes(file.type);
+    };
+
+    return (
+        <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Analysis</h1>
+            <div className="bg-white shadow sm:rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        Upload Dataset for Analysis
+                    </h3>
+                    <div className="mt-2 max-w-xl text-sm text-gray-500">
+                        <p>Upload your Excel file containing time series data for analysis.</p>
+                    </div>
+                    <div className="mt-5">
+                        <div
+                            className="flex items-center justify-center w-full"
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                        >
+                            <label className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer ${isDragging
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+                                }`}>
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <FileSpreadsheet className="w-10 h-10 mb-3 text-gray-400" />
+                                    <p className="mb-2 text-sm text-gray-500">
+                                        <span className="font-semibold">Click to upload</span> or drag and drop
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        Excel files only (XLSX, XLS)
+                                    </p>
+                                    {file && (
+                                        <p className="mt-2 text-sm text-blue-600">
+                                            Selected: {file.name}
+                                        </p>
+                                    )}
+                                </div>
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept=".xlsx,.xls"
+                                    onChange={handleFileChange}
+                                />
+                            </label>
+                        </div>
+                    </div>
+
+                    {file && (
+                        <div className="mt-4">
+                            <button
+                                onClick={handleUpload}
+                                disabled={uploadDataset.isPending || analyzeDataset.isPending}
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                            >
+                                {uploadDataset.isPending || analyzeDataset.isPending ?
+                                    'Processing...' : 'Start Analysis'}
+                            </button>
+                        </div>
+                    )}
+
+                    {uploadDataset.error && (
+                        <Alert variant="destructive" className="mt-4">
+                            <AlertTitle>Upload Error</AlertTitle>
+                            <AlertDescription>
+                                {uploadDataset.error instanceof Error
+                                    ? uploadDataset.error.message
+                                    : 'Failed to upload dataset'}
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    {analyzeDataset.error && (
+                        <Alert variant="destructive" className="mt-4">
+                            <AlertTitle>Analysis Error</AlertTitle>
+                            <AlertDescription>
+                                {analyzeDataset.error instanceof Error
+                                    ? analyzeDataset.error.message
+                                    : 'Failed to analyze dataset'}
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};------
+./src/pages/ProjectsPage.tsx
+
+import { PlusCircle, FileSpreadsheet } from 'lucide-react';
+import { useProjects, useCreateProject } from '../hooks/useApi';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+
+
+export const ProjectsPage = () => {
+    const { data: projects, isLoading, error } = useProjects();
+    const createProject = useCreateProject();
+
+    const handleNewProject = () => {
+        createProject.mutate({
+            name: "New Project",
+            description: "Description for new project"
+        });
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>
+                    {error instanceof Error ? error.message : 'Failed to load projects'}
+                </AlertDescription>
+            </Alert>
+        );
+    }
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
+                <button
+                    onClick={handleNewProject}
+                    disabled={createProject.isPending}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                >
+                    <PlusCircle className="h-5 w-5 mr-2" />
+                    New Project
+                </button>
+            </div>
+
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul className="divide-y divide-gray-200">
+                    {projects?.map((project) => (
+                        <li key={project.id}>
+                            <div className="px-4 py-4 sm:px-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <FileSpreadsheet className="h-5 w-5 text-gray-400 mr-3" />
+                                        <p className="text-sm font-medium text-blue-600 truncate">{project.name}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-2 sm:flex sm:justify-between">
+                                    <div className="sm:flex">
+                                        <p className="flex items-center text-sm text-gray-500">
+                                            Last updated {new Date(project.updated_at).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                        Owner: {project.owner}
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {createProject.error && (
+                <Alert variant="destructive" className="mt-4">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                        Failed to create project: {createProject.error instanceof Error ? createProject.error.message : 'Unknown error'}
+                    </AlertDescription>
+                </Alert>
+            )}
+        </div>
+    );
+};------
+./src/pages/HomePage.tsx
+import { PlusCircle, FileSpreadsheet, TrendingUp } from 'lucide-react';
+import { QuickActionCard } from '../components/features/home/QuickActionCard';
+
+export const HomePage = () => {
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">
+                Welcome to Mann Kendall Automated
+            </h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <QuickActionCard
+                    title="Create New Project"
+                    description="Start a new analysis project"
+                    icon={<PlusCircle className="h-6 w-6 text-blue-600" />}
+                    href="/projects/new"
+                />
+                <QuickActionCard
+                    title="Upload Dataset"
+                    description="Add new data for analysis"
+                    icon={<FileSpreadsheet className="h-6 w-6 text-blue-600" />}
+                    href="/analysis/new"
+                />
+                <QuickActionCard
+                    title="View Results"
+                    description="Check your analysis results"
+                    icon={<TrendingUp className="h-6 w-6 text-blue-600" />}
+                    href="/analysis"
+                />
+            </div>
+        </div>
+    );
+};------
+./src/services/api.ts
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
+// Create axios instance with default config
+export const api = axios.create({
+    baseURL: API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true, // Important for handling authentication cookies
+});
+
+// Types
+export interface Project {
+    id: string;
+    name: string;
+    description: string | null;
+    owner: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Dataset {
+    id: string;
+    project: string;
+    name: string;
+    file: string;
+    uploaded_at: string;
+    processed: boolean;
+}
+
+export interface AnalysisResult {
+    id: string;
+    dataset: string;
+    well_name: string;
+    parameter: string;
+    trend: string;
+    statistic: number;
+    coefficient_variation: number;
+    confidence_factor: number;
+    data_points: number;
+    minimum_value: number;
+    maximum_value: number;
+    mean_value: number;
+    analysis_date: string;
+}
+
+// API functions
+export const projectsApi = {
+    // Get all projects
+    getAll: () => api.get<Project[]>('/projects/').then(res => res.data),
+
+    // Get single project
+    getById: (id: string) => api.get<Project>(`/projects/${id}/`).then(res => res.data),
+
+    // Create new project
+    create: (data: Omit<Project, 'id' | 'owner' | 'created_at' | 'updated_at'>) =>
+        api.post<Project>('/projects/', data).then(res => res.data),
+
+    // Update project
+    update: (id: string, data: Partial<Project>) =>
+        api.patch<Project>(`/projects/${id}/`, data).then(res => res.data),
+
+    // Delete project
+    delete: (id: string) => api.delete(`/projects/${id}/`)
+};
+
+export const datasetsApi = {
+    // Get all datasets
+    getAll: () => api.get<Dataset[]>('/datasets/').then(res => res.data),
+
+    // Get datasets for a project
+    getByProject: (projectId: string) =>
+        api.get<Dataset[]>('/datasets/', { params: { project: projectId } })
+            .then(res => res.data),
+
+    // Upload new dataset
+    upload: (projectId: string, name: string, file: File) => {
+        const formData = new FormData();
+        formData.append('project', projectId);
+        formData.append('name', name);
+        formData.append('file', file);
+
+        return api.post<Dataset>('/datasets/', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        }).then(res => res.data);
+    },
+
+    // Start analysis for a dataset
+    analyze: (datasetId: string) =>
+        api.post<{ message: string; results_count: number }>(`/datasets/${datasetId}/analyze/`)
+            .then(res => res.data)
+};
+
+export const analysisApi = {
+    // Get all analyses
+    getAll: () => api.get<AnalysisResult[]>('/analyses/').then(res => res.data),
+
+    // Get analyses for a dataset
+    getByDataset: (datasetId: string) =>
+        api.get<AnalysisResult[]>('/analyses/dataset_results/', {
+            params: { dataset_id: datasetId }
+        }).then(res => res.data)
+};
+
+// Error handling
+api.interceptors.response.use(
+    response => response,
+    error => {
+        // Handle different error types
+        if (error.response?.status === 401) {
+            // Handle unauthorized - maybe redirect to login
+            window.location.href = '/login';
+        }
+
+        return Promise.reject(error);
+    }
+);
