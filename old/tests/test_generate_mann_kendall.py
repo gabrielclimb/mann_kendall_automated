@@ -4,7 +4,6 @@ from .context import generate_mann_kendall
 
 
 class TestGenerateMannKendall:
-
     file = "src/tests/files/example_input.xlsx"
     print(os.listdir())
     result = generate_mann_kendall(file)

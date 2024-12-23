@@ -11,7 +11,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.generate import generate_mann_kendall
+from src.old.generate import generate_mann_kendall
 from src.utils.fix_string import get_columns_with_incorrect_values
 
 
@@ -30,22 +30,30 @@ def main() -> None:
     if file_upload:
         try:
             results, dataframe = cache_generate_mann_kendall(file_upload)
-            
+
             if get_columns_with_incorrect_values(dataframe):
-                st.warning("The input file contains some incorrect values. Please check and fix them for accurate results.")
-            
-            st.sidebar.markdown(get_table_download_link(results), unsafe_allow_html=True)
+                st.warning(
+                    "The input file contains some incorrect values. Please check and fix them for accurate results."
+                )
+
+            st.sidebar.markdown(
+                get_table_download_link(results), unsafe_allow_html=True
+            )
             plot_online(results, dataframe)
         except pd.errors.EmptyDataError:
             st.error("The uploaded file is empty. Please upload a file with data.")
         except pd.errors.ParserError:
-            st.error("Unable to parse the uploaded file. Please ensure it's a valid Excel file.")
+            st.error(
+                "Unable to parse the uploaded file. Please ensure it's a valid Excel file."
+            )
         except ValueError as ve:
             st.error(f"Value Error: {str(ve)}")
         except TypeError as te:
             st.error(f"Type Error: {str(te)}. Please check your data types.")
         except Exception as e:
-            st.error(f"An unexpected error occurred: {str(e)}. Please try again or contact support.")
+            st.error(
+                f"An unexpected error occurred: {str(e)}. Please try again or contact support."
+            )
 
 
 @st.cache_data
@@ -111,7 +119,6 @@ def plot_online(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
     desired_wells = st.multiselect("Select Well", results.Well.unique())
 
     if len(desired_wells):
-
         desired_component = get_desired_component(results, desired_wells)
 
         df_filtered = filter_well_component(dataframe, desired_wells, desired_component)

@@ -12,21 +12,59 @@
 -e file:.
 altair==5.4.1
     # via streamlit
+amqp==5.3.1
+    # via kombu
+asgiref==3.8.1
+    # via django
+    # via django-cors-headers
 attrs==24.2.0
     # via jsonschema
     # via referencing
+billiard==4.2.1
+    # via celery
 blinker==1.8.2
     # via streamlit
 cachetools==5.5.0
     # via streamlit
+celery==5.4.0
+    # via django-celery-results
+    # via mann-kendall-automated
 certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
+    # via celery
+    # via click-didyoumean
+    # via click-plugins
+    # via click-repl
     # via streamlit
+click-didyoumean==0.3.1
+    # via celery
+click-plugins==1.1.1
+    # via celery
+click-repl==0.3.0
+    # via celery
 coverage==7.6.1
     # via pytest-cov
+dj-database-url==2.3.0
+    # via mann-kendall-automated
+django==5.1.4
+    # via dj-database-url
+    # via django-celery-results
+    # via django-cors-headers
+    # via djangorestframework
+    # via djangorestframework-simplejwt
+    # via mann-kendall-automated
+django-celery-results==2.5.1
+    # via mann-kendall-automated
+django-cors-headers==4.6.0
+    # via mann-kendall-automated
+djangorestframework==3.15.2
+    # via djangorestframework-simplejwt
+    # via mann-kendall-automated
+djangorestframework-simplejwt==5.3.1
+    # via mann-kendall-automated
 et-xmlfile==1.1.0
     # via openpyxl
 gitdb==4.0.11
@@ -44,6 +82,8 @@ jsonschema==4.23.0
     # via altair
 jsonschema-specifications==2023.12.1
     # via jsonschema
+kombu==5.4.2
+    # via celery
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.5
@@ -74,19 +114,31 @@ plotly==5.24.0
     # via mann-kendall-automated
 pluggy==1.5.0
     # via pytest
+prompt-toolkit==3.0.48
+    # via click-repl
 protobuf==5.28.0
     # via streamlit
+psycopg2-binary==2.9.10
+    # via mann-kendall-automated
 pyarrow==17.0.0
     # via streamlit
 pydeck==0.9.1
     # via streamlit
 pygments==2.18.0
     # via rich
+pyjwt==2.10.1
+    # via djangorestframework-simplejwt
 pytest==8.3.2
+    # via pytest-asyncio
     # via pytest-cov
+    # via pytest-django
+pytest-asyncio==0.25.0
 pytest-cov==5.0.0
+pytest-django==4.9.0
 python-dateutil==2.9.0.post0
+    # via celery
     # via pandas
+python-dotenv==1.0.1
 pytz==2024.1
     # via pandas
 referencing==0.35.1
@@ -106,6 +158,8 @@ six==1.16.0
     # via python-dateutil
 smmap==5.0.1
     # via gitdb
+sqlparse==0.5.3
+    # via django
 streamlit==1.38.0
     # via mann-kendall-automated
 tenacity==8.5.0
@@ -117,12 +171,21 @@ tornado==6.4.1
     # via streamlit
 typing-extensions==4.12.2
     # via altair
+    # via dj-database-url
     # via streamlit
 tzdata==2024.1
+    # via celery
+    # via kombu
     # via pandas
 urllib3==2.2.2
     # via requests
 uv==0.4.2
+vine==5.1.0
+    # via amqp
+    # via celery
+    # via kombu
+wcwidth==0.2.13
+    # via prompt-toolkit
 xlrd==2.0.1
     # via mann-kendall-automated
 xlsxwriter==3.2.0

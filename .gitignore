@@ -4,5 +4,6 @@ debug.py
 *.DS_Store
 *.coverage
 *.pytest_cache
-venv/
+.venv/
 pytest-coverage.txt
+.env
