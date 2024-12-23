@@ -3,7 +3,6 @@ from typing import List, Optional
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
-
 from src.domain.entities.analysis_result import AnalysisResult
 from src.domain.ports.analysis_repository import AnalysisRepository
 from src.infrastructure.django.models import AnalysisModel

@@ -4,7 +4,6 @@ from uuid import uuid4
 
 import pytest
 from django.contrib.auth.models import User
-
 from src.domain.entities.analysis_result import AnalysisResult
 from src.infrastructure.django.models import DatasetModel, ProjectModel
 from src.infrastructure.repositories.django_analysis_repository import (

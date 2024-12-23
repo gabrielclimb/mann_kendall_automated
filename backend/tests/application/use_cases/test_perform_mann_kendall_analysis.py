@@ -2,7 +2,6 @@ from uuid import uuid4
 
 import pandas as pd
 import pytest
-
 from src.application.use_cases.perform_mann_kendall_analysis import (
     PerformMannKendallAnalysis,
 )

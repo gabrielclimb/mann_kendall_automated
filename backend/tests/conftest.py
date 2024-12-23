@@ -5,7 +5,6 @@ from uuid import UUID, uuid4
 import numpy as np
 import pandas as pd
 import pytest
-
 from src.domain.entities.analysis_result import AnalysisResult
 from src.domain.ports.analysis_repository import AnalysisRepository
 

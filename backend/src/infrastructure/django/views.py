@@ -6,7 +6,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-
 from src.application.use_cases.perform_mann_kendall_analysis import (
     PerformMannKendallAnalysis,
 )

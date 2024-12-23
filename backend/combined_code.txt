@@ -1,0 +1,1702 @@
+------
+./old/generate.py
+# -*- coding: utf-8 -*-
+from __future__ import division
+
+from typing import Tuple
+
+import pandas as pd
+
+from .utils.fix_string import get_columns_with_incorrect_values, string_to_float
+from .utils.mann_kendall import mk_test
+from .utils.progress_bar import print_progress_bar
+
+
+def transpose_dataframe(file_name: str) -> pd.DataFrame:
+    """
+    Transposes the given DataFrame, replaces "ND" with 0.5, and renames columns.
+
+    Args:
+        file_name (str): Name of the file containing the DataFrame.
+
+    Returns:
+        pd.DataFrame: Transposed DataFrame with modified columns.
+    """
+    df = pd.read_excel(file_name, header=None, index_col=0)
+    df = df.replace("ND", 0.5)
+    df_tranposto = df.T
+    df_tranposto.columns.values[0] = "well"
+    df_tranposto.columns.values[1] = "Date"
+    return df_tranposto
+
+
+def generate_mann_kendall(file_name: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Generates the Mann Kendall test results and transposed DataFrame.
+
+    Args:
+        file_name (str): Name of the file containing the DataFrame.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]: Tuple containing the results
+            DataFrame and the transposed DataFrame.
+    """
+
+    df_tranposto = transpose_dataframe(file_name)
+
+    if get_columns_with_incorrect_values(df_tranposto):
+        print("You should fix this values firts")
+        raise TypeError
+
+    # check the number of samples per well, if less than 5, its ignore.
+
+    wells = pd.DataFrame(df_tranposto.well.value_counts() > 4).reset_index()
+    wells.columns = ["index", "well"]
+
+    wells = wells[wells.well].iloc[:, 0]
+
+    colunas = df_tranposto.columns[2:]
+
+    results = pd.DataFrame()
+    array = []
+    print_progress_bar(0, len(wells), prefix="Progress:", suffix="Complete", length=50)
+    count = 0
+    for w in wells:
+        count += 1
+        print_progress_bar(
+            count, len(wells), prefix="Progress:", suffix="Complete", length=50
+        )
+        df_temp = df_tranposto[df_tranposto.well == w]
+        for c in colunas:
+            try:
+                if df_temp.loc[:, c].dropna().count() > 3:
+                    valores = df_temp.loc[:, c].apply(string_to_float).dropna().values
+                    trend, s, cv, cf = mk_test(valores)
+                    array = [w, c, trend, s, cv, cf]
+                    results = pd.concat(
+                        [results, pd.DataFrame([array])], ignore_index=True
+                    )
+                else:
+                    continue
+            except TypeError:
+                valores = df_temp.loc[:, c].apply(string_to_float).fillna(0).values
+                raise TypeError(f"incorrect values: {valores}")
+
+    results.columns = [
+        "Well",
+        "Analise",
+        "Trend",
+        "Mann-Kendall Statistic (S)",
+        "Coefficient of Variation",
+        "Confidence Factor",
+    ]
+    return results, df_tranposto
+
+
+# def generate_xlsx(file_name):
+#     today = datetime.today().strftime("%Y_%m_%d")
+#     random_number = randint(1000, 5000)
+#     new_name = file_name.split("/")[-1].split('.')[0]
+#     output_name = f"output_tables/{new_name}_{today}_{random_number}.xlsx"
+#     try:
+#         results = generate_mann_kendall(file_name)
+#     except TypeError:
+#         exit()
+#     results.to_excel(output_name, index=False, sheet_name="mann_kendall")
+------
+./old/tests/__init__.py
+------
+./old/tests/context.py
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# pylint: disable=unused-import
+------
+./old/tests/test_mann_kendall.py
+import numpy as np
+
+from .context import mk_test
+
+
+def test_mk_test():
+    # Test with random data
+    x = np.random.rand(100)
+    trend, s, cv, cf = mk_test(x, 0.05)
+    assert isinstance(trend, str)
+    assert isinstance(s, float)
+    assert isinstance(cv, float)
+    assert isinstance(cf, float)
+
+    # Test with an increasing trend
+    x = np.arange(100)
+    trend, s, cv, cf = mk_test(x, 0.05)
+    assert trend in ["Increasing", "Prob. Increasing"]
+
+    # Test with a decreasing trend
+    x = np.arange(100, 0, -1)
+    trend, s, cv, cf = mk_test(x, 0.05)
+    assert trend in ["Decreasing", "Prob. Decreasing"]
+
+    # Test with constant data
+    x = np.full(100, 0.5)
+    trend, s, cv, cf = mk_test(x, 0.05)
+    assert trend in ["Stable", "No Trend"]
+
+    # Test with a significance level of 0.1
+    x = np.random.rand(100)
+    trend, s, cv, cf = mk_test(x, 0.1)
+    assert isinstance(trend, str)
+    assert isinstance(s, float)
+    assert isinstance(cv, float)
+    assert isinstance(cf, float)
+------
+./old/tests/test_generate_mann_kendall.py
+import os
+
+from .context import generate_mann_kendall
+
+
+class TestGenerateMannKendall:
+    file = "src/tests/files/example_input.xlsx"
+    print(os.listdir())
+    result = generate_mann_kendall(file)
+
+    def test_type(self):
+        assert isinstance(self.result, tuple)
+
+    def test_size(self):
+        assert len(self.result[0]) == 146
+
+    def test_columns_order(self):
+        columns = [
+            "Well",
+            "Analise",
+            "Trend",
+            "Mann-Kendall Statistic (S)",
+            "Coefficient of Variation",
+            "Confidence Factor",
+        ]
+        for i, column in enumerate(columns):
+            assert self.result[0].columns[i] == column
+------
+./old/tests/test_fix_string.py
+import pytest
+
+from .context import (
+    get_columns_with_incorrect_values,
+    string_test,
+    string_to_float,
+    transpose_dataframe,
+)
+
+
+class TestFixString:
+    PATH = "src/tests/files/"
+    file = PATH + "example_input.xlsx"
+    file_error = PATH + "example_input_with_string.xlsx"
+    df_error = transpose_dataframe(file_error)
+    df_right = transpose_dataframe(file)
+    value_right = "2"
+    string_right = "test"
+    value_wrong = "< 2"
+    string_wrong = "test<"
+
+    def test_string_to_float(self):
+        assert string_to_float(self.value_wrong) == 2
+        assert isinstance(string_to_float(self.value_wrong), float)
+        with pytest.raises(ValueError):
+            string_to_float(self.string_wrong)
+
+    def test_string_to_test(self):
+        assert string_test(self.value_right) is None
+        assert self.string_right == string_test(self.string_right)
+
+    def test_get_columns_with_incorrect_values(self):
+        assert get_columns_with_incorrect_values(self.df_error)
+
+    def test_get_columns_with_right_values(self):
+        assert get_columns_with_incorrect_values(self.df_right) is None
+------
+./old/utils/__init__.py
+------
+./old/utils/fix_string.py
+from typing import Optional, Union
+
+import pandas as pd
+
+
+def string_to_float(x: Union[str, float]) -> float:
+    """
+    Converts a string representation of a number to a float.
+
+    Args:
+        x (Union[str, float]): The value to convert.
+
+    Returns:
+        float: The converted float value.
+
+    Raises:
+        ValueError: If the value cannot be converted to float.
+    """
+    if isinstance(x, str):
+        return round(float(x.replace("<", "").strip()), 3)
+    return x
+
+
+def string_test(value: Union[str, float]) -> Optional[str]:
+    """
+    Checks if a value can be converted to float.
+
+    Args:
+        value (Union[str, float]): The value to test.
+
+    Returns:
+        Optional[str]: The original value if it cannot be converted to float, None otherwise.
+    """
+    try:
+        float(value)
+    except ValueError:
+        return value
+    except TypeError:
+        pass
+
+
+def get_columns_with_incorrect_values(df: pd.DataFrame) -> bool:
+    """
+    Finds columns in a DataFrame that contain incorrect values.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to analyze.
+
+    Returns:
+        bool: True if columns with incorrect values are found, False otherwise.
+    """
+    str_cols = df.select_dtypes(object).columns[2:]
+    string_in_float = [
+        column
+        for column in [df[col].apply(string_test).dropna() for col in str_cols]
+        if len(column) > 0
+    ]
+    if len(string_in_float):
+        for s in string_in_float:
+            print(f"Column name: {s.name}\nValues: {s.values}\n")
+        return True
+------
+./old/utils/mann_kendall.py
+from typing import Tuple
+
+import numpy as np
+from scipy.stats import norm
+
+
+def mk_test(x: np.ndarray, alpha: float = 0.05) -> Tuple[str, float, float, float]:
+    """
+    This function is derived from code originally posted by Sat Kumar Tomer
+    (satkumartomer@gmail.com)
+    See also: http://vsp.pnnl.gov/help/Vsample/Design_Trend_Mann_Kendall.htm
+    The purpose of the Mann-Kendall (MK) test (Mann 1945, Kendall 1975, Gilbert
+    1987) is to statistically assess if there is a monotonic upward or downward
+    trend of the variable of interest over time. A monotonic upward (downward)
+    trend means that the variable consistently increases (decreases) through
+    time, but the trend may or may not be linear. The MK test can be used in
+    place of a parametric linear regression analysis, which can be used to test
+    if the slope of the estimated linear regression line is different from
+    zero. The regression analysis requires that the residuals from the fitted
+    regression line be normally distributed; an assumption not required by the
+    MK test, that is, the MK test is a non-parametric (distribution-free) test.
+    Hirsch, Slack and Smith (1982, page 107) indicate that the MK test is best
+    viewed as an exploratory analysis and is most appropriately used to
+    identify stations where changes are significant or of large magnitude and
+    to quantify these findings.
+    Input:
+        x:   a vector of data
+        alpha: significance level (0.05 default)
+    Output:
+        trend: tells the trend (increasing, decreasing or no trend)
+        h: True (if trend is present) or False (if trend is absence)
+        p: p value of the significance test
+        z: normalized test statistics
+    Examples
+    --------
+      >>> x = np.random.rand(100)
+      >>> trend,h,p,z = mk_test(x,0.05)
+    """
+    n = len(x)
+
+    # calculate S
+    s = 0
+    for k in range(n - 1):
+        for j in range(k + 1, n):
+            s += np.sign(x[j] - x[k])
+
+    # calculate the unique data
+    unique_x = np.unique(x)
+    g = len(unique_x)
+
+    # calculate the var(s)
+    if n == g:  # there is no tie
+        var_s = (n * (n - 1) * (2 * n + 5)) / 18
+    else:  # there are some ties in data
+        tp = np.zeros(unique_x.shape)
+        for i, unique_val in enumerate(unique_x):
+            tp[i] = sum(x == unique_val)
+        var_s = (n * (n - 1) * (2 * n + 5) - np.sum(tp * (tp - 1) * (2 * tp + 5))) / 18
+
+    # standardized test statistic Z
+    if s > 0:
+        z = (s - 1) / np.sqrt(var_s)
+    elif s < 0:
+        z = (s + 1) / np.sqrt(var_s)
+    elif s == 0:
+        z = 0
+
+    # ----------------
+    # Enviroment Company section
+    # ----------------
+    # Coefficient of Variation
+    cv = np.std(x, ddof=1) / np.mean(x)
+    # calculate the p_value
+    p = 1 - norm.cdf(abs(z))  # one tail test
+    _ = abs(z) > norm.ppf(1 - alpha)
+    # ----------------
+    # Confidence Factor
+    cf = 1 - p
+    # # ----------------
+
+    if cf < 0.9:
+        if s <= 0 and cv < 1:
+            trend = "Stable"
+        else:
+            trend = "No Trend"
+    else:
+        if cf <= 0.95:
+            if s > 0:
+                trend = "Prob. Increasing"
+            else:
+                trend = "Prob. Decreasing"
+        else:
+            if s > 0:
+                trend = "Increasing"
+            else:
+                trend = "Decreasing"
+
+    return trend, round(s, 4), round(cv, 2), round(cf, 3)
+------
+./old/utils/progress_bar.py
+def print_progress_bar(
+    iteration: int,
+    total: int,
+    prefix: str = "",
+    suffix: str = "",
+    decimals: int = 1,
+    length: int = 100,
+    fill: str = "█",
+    printEnd: str = "\r",
+) -> None:
+    """
+    Prints a progress bar in the terminal.
+
+    Args:
+        iteration (int): Current iteration.
+        total (int): Total iterations.
+        prefix (str, optional): Prefix string. Defaults to "".
+        suffix (str, optional): Suffix string. Defaults to "".
+        decimals (int, optional): Number of decimals in the percent complete. Defaults to 1.
+        length (int, optional): Character length of the progress bar. Defaults to 100.
+        fill (str, optional): Bar fill character. Defaults to "█".
+        printEnd (str, optional): End character (e.g., "\r", "\r\n"). Defaults to "\r".
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    progress_bar = fill * filledLength + "-" * (length - filledLength)
+    print("\r%s |%s| %s%% %s" % (prefix, progress_bar, percent, suffix), end=printEnd)
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+------
+./old/app.py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+__author__ = "Gabriel Barbosa Soares"
+
+import base64
+from io import BytesIO
+from typing import List, Tuple
+
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+from src.old.generate import generate_mann_kendall
+from src.utils.fix_string import get_columns_with_incorrect_values
+
+
+def main() -> None:
+    """
+    Function responsible for running the Streamlit app.
+    """
+    st.set_page_config("Mann Kendall Automated")
+
+    st.title(body="Mann Kendall Automated")
+
+    file_upload = st.sidebar.file_uploader(
+        label="Upload Excel File", type=["xlsx", "xls"]
+    )
+
+    if file_upload:
+        try:
+            results, dataframe = cache_generate_mann_kendall(file_upload)
+
+            if get_columns_with_incorrect_values(dataframe):
+                st.warning(
+                    "The input file contains some incorrect values. Please check and fix them for accurate results."
+                )
+
+            st.sidebar.markdown(
+                get_table_download_link(results), unsafe_allow_html=True
+            )
+            plot_online(results, dataframe)
+        except pd.errors.EmptyDataError:
+            st.error("The uploaded file is empty. Please upload a file with data.")
+        except pd.errors.ParserError:
+            st.error(
+                "Unable to parse the uploaded file. Please ensure it's a valid Excel file."
+            )
+        except ValueError as ve:
+            st.error(f"Value Error: {str(ve)}")
+        except TypeError as te:
+            st.error(f"Type Error: {str(te)}. Please check your data types.")
+        except Exception as e:
+            st.error(
+                f"An unexpected error occurred: {str(e)}. Please try again or contact support."
+            )
+
+
+@st.cache_data
+def cache_generate_mann_kendall(file) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Caches the generate_mann_kendall function to avoid re-computation.
+
+    Arguments:
+        file {File} -- Uploaded Excel file.
+
+    Returns:
+        tuple -- Tuple containing the results and the DataFrame.
+    """
+    return generate_mann_kendall(file.getvalue())
+
+
+def get_table_download_link(dataframe: pd.DataFrame) -> str:
+    """
+    Generates a button to download a file.
+
+    Arguments:
+        dataframe {pd.DataFrame} -- DataFrame to be downloaded.
+
+    Returns:
+        str -- HTML string representing a button with a href as stream.
+    """
+    val = to_excel(dataframe)
+    b64 = base64.b64encode(val)
+    # TODO: Create a random number as filename, check generate_xlsx
+    return (
+        '<p style="text-align:center;">'
+        f'<a href="data:application/octet-stream;base64,{b64.decode()}" '
+        'download="mann_kendall.xlsx">Download Excel file</a></p>'
+    )
+    # decode b'abc' => abc)
+
+
+def to_excel(dataframe: pd.DataFrame) -> bytes:
+    """
+    Converts a DataFrame to Excel format and returns it as bytes.
+
+    Arguments:
+        dataframe {pd.DataFrame} -- DataFrame to be converted to Excel format.
+
+    Returns:
+        bytes -- Excel file as bytes.
+    """
+
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        dataframe.to_excel(writer, index=False, sheet_name="Sheet1")
+    return output.getvalue()
+
+
+def plot_online(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
+    """
+    Plots the data online using Plotly.
+
+    Arguments:
+        results -- Results of the Mann Kendall test.
+        dataframe {pd.DataFrame} -- DataFrame containing the data.
+    """
+    desired_wells = st.multiselect("Select Well", results.Well.unique())
+
+    if len(desired_wells):
+        desired_component = get_desired_component(results, desired_wells)
+
+        df_filtered = filter_well_component(dataframe, desired_wells, desired_component)
+        df_filtered = df_filtered.dropna()
+        # df_filtered = fillna(df_filtered, desired_component)
+        log_scale = choose_log_scale()
+
+        name = ", ".join(desired_wells)
+
+        fig = px.line(
+            df_filtered.reset_index(drop=True).fillna(method="pad"),
+            x="Date",
+            y=desired_component,
+            color="well",
+            log_y=log_scale,
+            title=f"{name} x {desired_component}",
+            # width=300,
+            # height=600
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+
+def get_desired_component(results: pd.DataFrame, desired_wells: List[str]) -> str:
+    """
+    Gets the desired component selected by the user.
+
+    Arguments:
+        results {pd.DataFrame} -- Results of the Mann Kendall test.
+        desired_wells {list} -- List of desired wells.
+
+    Returns:
+        str -- Desired component selected by the user.
+    """
+    results_filter_by_well = results[results.Well.isin(desired_wells)]
+    desired_component = st.selectbox(
+        "Select Component", results_filter_by_well.Analise.unique()
+    )
+    return desired_component
+
+
+def filter_well_component(
+    df_transposed: pd.DataFrame, desired_well: list, desired_component: str
+) -> pd.DataFrame:
+    """
+    Filters the DataFrame to include only the desired wells and component.
+
+    Arguments:
+        df_transposed {pd.DataFrame} -- Transposed DataFrame.
+        desired_well {list} -- List of desired wells.
+        desired_component {str} -- Desired component selected by the user.
+
+    Returns:
+        pd.DataFrame -- Filtered DataFrame.
+    """
+
+    df_filtered = df_transposed[df_transposed.well.isin(desired_well)]
+
+    df_filtered = df_filtered[["well", "Date", desired_component]].sort_values("Date")
+    df_filtered[desired_component] = df_filtered[desired_component].apply(float)
+    df_filtered = df_filtered.reset_index(drop=True)
+    return df_filtered
+
+
+def choose_log_scale() -> bool:
+    """
+    Allows the user to choose between a logarithmic or linear scale for the y-axis.
+
+    Returns:
+        bool -- True if log scale is selected, False otherwise.
+    """
+    log_scale = st.selectbox("Select Scale", ["Log", "Linear"])
+    if log_scale == "Log":
+        return True
+    return False
+
+
+def fillna(df_filtered: pd.DataFrame, component: str) -> pd.DataFrame:
+    """
+    Fills missing values in the DataFrame.
+
+    Arguments:
+        df_filtered {pd.DataFrame} -- Filtered DataFrame.
+        component {str} -- Component selected by the user.
+
+    Returns:
+        pd.DataFrame -- DataFrame with missing values filled.
+    """
+    df_concat = pd.DataFrame()
+    for well in df_filtered.well.unique():
+        df_temp = df_filtered.query(f"well=='{well}'").sort_values("Date")
+        df_temp[component] = df_temp[component].fillna(method="ffill", limit=1)
+        df_concat = pd.concat([df_temp, df_concat])
+    return df_concat
+
+
+if __name__ == "__main__":
+    main()
+------
+./manage.py
+#!/usr/bin/env python
+"""Django's command-line utility for administrative tasks."""
+
+import os
+import sys
+
+
+def main():
+    """Run administrative tasks."""
+    os.environ.setdefault(
+        "DJANGO_SETTINGS_MODULE", "src.infrastructure.django.settings"
+    )
+    try:
+        from django.core.management import execute_from_command_line
+    except ImportError as exc:
+        raise ImportError(
+            "Couldn't import Django. Are you sure it's installed and "
+            "available on your PYTHONPATH environment variable? Did you "
+            "forget to activate a virtual environment?"
+        ) from exc
+    execute_from_command_line(sys.argv)
+
+
+if __name__ == "__main__":
+    main()
+------
+./src/__init__.py
+------
+./src/application/__init__.py
+------
+./src/application/use_cases/perform_mann_kendall_analysis.py
+from datetime import datetime
+from typing import List
+from uuid import UUID, uuid4
+
+import numpy as np
+import pandas as pd
+from scipy.stats import norm
+
+from src.domain.entities.analysis_result import AnalysisResult
+from src.domain.ports.analysis_repository import AnalysisRepository
+
+
+class PerformMannKendallAnalysis:
+    """Use case for performing Mann-Kendall trend analysis"""
+
+    def __init__(self, analysis_repository: AnalysisRepository):
+        self.analysis_repository = analysis_repository
+
+    def _transpose_dataframe(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Transposes the given DataFrame, replaces "ND" with 0.5, and renames columns.
+        Uses position-based column naming.
+
+        Args:
+            data: DataFrame with wells as columns and dates as first row
+
+        Returns:
+            pd.DataFrame: Transposed DataFrame with modified columns.
+        """
+        df = data.replace("ND", 0.5)
+        df_transposto = df.T
+        # Use positions to rename columns, not names
+        df_transposto.columns.values[0] = "well"
+        df_transposto.columns.values[1] = "Date"
+        return df_transposto
+
+    async def execute(
+        self, dataset_id: UUID, data: pd.DataFrame
+    ) -> List[AnalysisResult]:
+        """Execute Mann-Kendall analysis on the provided dataset"""
+        try:
+            # Transform the data using original position-based method
+            df_transformed = self._transpose_dataframe(data)
+
+            # Get wells with sufficient data points (>4)
+            wells = pd.DataFrame(df_transformed.well.value_counts() > 4).reset_index()
+            wells.columns = ["index", "well"]
+            wells = wells[wells.well].iloc[:, 0]
+
+            # Parameters to analyze (all columns except well and date)
+            parameters = df_transformed.columns[2:]
+
+            results = []
+
+            # Perform analysis for each well and parameter
+            for well in wells:
+                df_well = df_transformed[df_transformed.well == well]
+
+                for param in parameters:
+                    try:
+                        if df_well.loc[:, param].dropna().count() > 3:
+                            values = df_well.loc[:, param].dropna().values
+
+                            trend, s, cv, cf = self._mann_kendall_test(values)
+
+                            result = AnalysisResult(
+                                id=uuid4(),
+                                dataset_id=dataset_id,
+                                well_name=well,
+                                parameter=param,
+                                trend=trend,
+                                statistic=s,
+                                coefficient_variation=cv,
+                                confidence_factor=cf,
+                                analysis_date=datetime.utcnow(),
+                                data_points=len(values),
+                                minimum_value=float(np.min(values)),
+                                maximum_value=float(np.max(values)),
+                                mean_value=float(np.mean(values)),
+                            )
+
+                            await self.analysis_repository.save(result)
+                            results.append(result)
+                    except TypeError:
+                        continue
+
+            return results
+
+        except Exception as e:
+            raise ValueError(f"Error performing Mann-Kendall analysis: {str(e)}")
+
+    def _mann_kendall_test(self, x: np.ndarray, alpha: float = 0.05) -> tuple:
+        """
+        Perform Mann-Kendall trend test.
+        This is the same as your original implementation.
+        """
+        n = len(x)
+
+        # Calculate S
+        s = 0
+        for k in range(n - 1):
+            for j in range(k + 1, n):
+                s += np.sign(x[j] - x[k])
+
+        # Calculate variance
+        unique_x = np.unique(x)
+        g = len(unique_x)
+
+        if n == g:  # No ties
+            var_s = (n * (n - 1) * (2 * n + 5)) / 18
+        else:  # Handle ties
+            tp = np.zeros(unique_x.shape)
+            for i, val in enumerate(unique_x):
+                tp[i] = sum(x == val)
+            var_s = (
+                n * (n - 1) * (2 * n + 5) - np.sum(tp * (tp - 1) * (2 * tp + 5))
+            ) / 18
+
+        # Calculate Z
+        if s > 0:
+            z = (s - 1) / np.sqrt(var_s)
+        elif s < 0:
+            z = (s + 1) / np.sqrt(var_s)
+        else:
+            z = 0
+
+        # Calculate coefficient of variation and confidence factor
+        cv = np.std(x, ddof=1) / np.mean(x)
+        p = 1 - norm.cdf(abs(z))
+        cf = 1 - p
+
+        # Determine trend
+        if cf < 0.9:
+            trend = "Stable" if s <= 0 and cv < 1 else "No Trend"
+        else:
+            if cf <= 0.95:
+                trend = "Prob. Increasing" if s > 0 else "Prob. Decreasing"
+            else:
+                trend = "Increasing" if s > 0 else "Decreasing"
+
+        return trend, round(s, 4), round(cv, 2), round(cf, 3)
+------
+./src/application/use_cases/__init__.py
+------
+./src/application/services/__init__.py
+------
+./src/infrastructure/__init__.py
+------
+./src/infrastructure/repositories/django_analysis_repository.py
+# src/infrastructure/repositories/django_analysis_repository.py
+from typing import List, Optional
+from uuid import UUID
+
+from asgiref.sync import sync_to_async
+
+from src.domain.entities.analysis_result import AnalysisResult
+from src.domain.ports.analysis_repository import AnalysisRepository
+from src.infrastructure.django.models import AnalysisModel
+
+
+class DjangoAnalysisRepository(AnalysisRepository):
+    async def save(self, result: AnalysisResult) -> AnalysisResult:
+        """Save analysis result to Django database"""
+        analysis_dict = {
+            "dataset_id": result.dataset_id,
+            "status": "completed",
+            "parameters": {
+                "well_name": result.well_name,
+                "parameter": result.parameter,
+                "data_points": result.data_points,
+                "minimum_value": result.minimum_value,
+                "maximum_value": result.maximum_value,
+                "mean_value": result.mean_value,
+            },
+            "results": {
+                "trend": result.trend,
+                "statistic": result.statistic,
+                "coefficient_variation": result.coefficient_variation,
+                "confidence_factor": result.confidence_factor,
+            },
+        }
+
+        analysis_model = await AnalysisModel.objects.acreate(**analysis_dict)
+        return self._to_entity(analysis_model)
+
+    async def get_by_id(self, result_id: UUID) -> Optional[AnalysisResult]:
+        """Retrieve analysis result by ID"""
+        try:
+            model = await AnalysisModel.objects.aget(id=result_id)
+            return self._to_entity(model)
+        except AnalysisModel.DoesNotExist:
+            return None
+
+    async def list_by_dataset(self, dataset_id: UUID) -> List[AnalysisResult]:
+        """List all results for a dataset"""
+        queryset = AnalysisModel.objects.filter(dataset_id=dataset_id)
+        models = await sync_to_async(list)(queryset)
+        results = []
+        for model in models:
+            try:
+                result = self._to_entity(model)
+                if result:
+                    results.append(result)
+            except (KeyError, TypeError):
+                continue
+        return results
+
+    def _to_entity(self, model: AnalysisModel) -> Optional[AnalysisResult]:
+        """Convert Django model to domain entity"""
+        params = model.parameters or {}
+        results = model.results or {}
+
+        # Skip records without required data
+        if not params or not results:
+            return None
+
+        try:
+            return AnalysisResult(
+                id=model.id,
+                dataset_id=model.dataset_id,
+                well_name=params.get("well_name", "Unknown"),
+                parameter=params.get("parameter", "Unknown"),
+                trend=results.get("trend", "No Trend"),
+                statistic=results.get("statistic", 0.0),
+                coefficient_variation=results.get("coefficient_variation", 0.0),
+                confidence_factor=results.get("confidence_factor", 0.0),
+                analysis_date=model.completed_at or model.created_at,
+                data_points=params.get("data_points", 0),
+                minimum_value=params.get("minimum_value", 0.0),
+                maximum_value=params.get("maximum_value", 0.0),
+                mean_value=params.get("mean_value", 0.0),
+            )
+        except Exception:
+            return None
+------
+./src/infrastructure/repositories/django_project_repository.py
+from typing import List, Optional
+from uuid import UUID
+
+from src.domain.entities.project import Project
+from src.domain.ports.project_repository import ProjectRepository
+from src.infrastructure.django.models import ProjectModel
+
+
+class DjangoProjectRepository(ProjectRepository):
+    async def save(self, project: Project) -> Project:
+        project_model = await ProjectModel.objects.aupdate_or_create(
+            id=project.id,
+            defaults={
+                "name": project.name,
+                "description": project.description,
+                "owner_id": project.owner_id,
+            },
+        )
+        return self._to_entity(project_model[0])
+
+    async def get_by_id(self, project_id: UUID) -> Optional[Project]:
+        try:
+            project_model = await ProjectModel.objects.aget(id=project_id)
+            return self._to_entity(project_model)
+        except ProjectModel.DoesNotExist:
+            return None
+
+    async def list_by_owner(self, owner_id: UUID) -> List[Project]:
+        project_models = await ProjectModel.objects.filter(owner_id=owner_id)
+        return [self._to_entity(pm) for pm in project_models]
+
+    async def delete(self, project_id: UUID) -> None:
+        await ProjectModel.objects.filter(id=project_id).adelete()
+
+    async def update(self, project: Project) -> Project:
+        project_model = await ProjectModel.objects.aget(id=project.id)
+        project_model.name = project.name
+        project_model.description = project.description
+        await project_model.asave()
+        return self._to_entity(project_model)
+
+    def _to_entity(self, model: ProjectModel) -> Project:
+        return Project(
+            id=model.id,
+            name=model.name,
+            description=model.description,
+            owner_id=model.owner.id,
+            created_at=model.created_at,
+            updated_at=model.updated_at,
+        )
+------
+./src/infrastructure/repositories/__init__.py
+------
+./src/infrastructure/django/migrations/0002_initial.py
+# Generated by Django 5.1.4 on 2024-12-23 09:13
+
+import uuid
+
+import django.db.models.deletion
+from django.conf import settings
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+    initial = True
+
+    dependencies = [
+        ("django", "0001_initial"),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name="DatasetModel",
+            fields=[
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                ("file", models.FileField(upload_to="datasets/")),
+                ("uploaded_at", models.DateTimeField(auto_now_add=True)),
+                ("processed", models.BooleanField(default=False)),
+            ],
+            options={
+                "db_table": "datasets",
+                "ordering": ["-uploaded_at"],
+            },
+        ),
+        migrations.CreateModel(
+            name="AnalysisModel",
+            fields=[
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("processing", "Processing"),
+                            ("completed", "Completed"),
+                            ("failed", "Failed"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("parameters", models.JSONField(default=dict)),
+                ("results", models.JSONField(blank=True, null=True)),
+                ("error_message", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "dataset",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="analyses",
+                        to="django.datasetmodel",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name_plural": "analyses",
+                "db_table": "analyses",
+                "ordering": ["-created_at"],
+            },
+        ),
+        migrations.CreateModel(
+            name="ProjectModel",
+            fields=[
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="projects",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+            ],
+            options={
+                "db_table": "projects",
+                "ordering": ["-created_at"],
+            },
+        ),
+        migrations.AddField(
+            model_name="datasetmodel",
+            name="project",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="datasets",
+                to="django.projectmodel",
+            ),
+        ),
+    ]
+------
+./src/infrastructure/django/migrations/__init__.py
+------
+./src/infrastructure/django/migrations/0003_update_analysis_model_parameters.py
+# Generated by Django 5.1.4 on 2024-12-23 09:18
+
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ("django", "0002_initial"),
+    ]
+
+    operations = [
+        migrations.AlterField(
+            model_name="analysismodel",
+            name="parameters",
+            field=models.JSONField(blank=True, default=dict, null=True),
+        ),
+    ]
+------
+./src/infrastructure/django/migrations/0001_initial.py
+# Generated by Django 5.1.4 on 2024-12-23 09:13
+
+from django.db import migrations
+
+
+class Migration(migrations.Migration):
+    dependencies = []
+
+    operations = []
+------
+./src/infrastructure/django/models.py
+import uuid
+
+from django.contrib.auth.models import User
+from django.db import models
+
+
+class ProjectModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = "django"
+        db_table = "projects"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class DatasetModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(
+        ProjectModel, on_delete=models.CASCADE, related_name="datasets"
+    )
+    name = models.CharField(max_length=200)
+    file = models.FileField(upload_to="datasets/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    processed = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = "django"
+        db_table = "datasets"
+        ordering = ["-uploaded_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.project.name})"
+
+
+class AnalysisModel(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    dataset = models.ForeignKey(
+        DatasetModel, on_delete=models.CASCADE, related_name="analyses"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    parameters = models.JSONField(default=dict, null=True, blank=True)  # Made nullable
+    results = models.JSONField(null=True, blank=True)
+    error_message = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        app_label = "django"
+        db_table = "analyses"
+        ordering = ["-created_at"]
+        verbose_name_plural = "analyses"
+
+    def __str__(self):
+        return f"Analysis for {self.dataset.name}"
+------
+./src/infrastructure/django/serializers.py
+from rest_framework import serializers
+
+from .models import AnalysisModel, DatasetModel, ProjectModel
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source="owner.username")
+
+    class Meta:
+        model = ProjectModel
+        fields = ["id", "name", "description", "owner", "created_at", "updated_at"]
+        read_only_fields = ["created_at", "updated_at"]
+
+
+class DatasetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DatasetModel
+        fields = ["id", "project", "name", "file", "uploaded_at", "processed"]
+        read_only_fields = ["uploaded_at", "processed"]
+
+
+class AnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnalysisModel
+        fields = [
+            "id",
+            "dataset",
+            "status",
+            "parameters",
+            "results",
+            "error_message",
+            "created_at",
+            "completed_at",
+        ]
+        read_only_fields = [
+            "status",
+            "results",
+            "error_message",
+            "created_at",
+            "completed_at",
+        ]
+
+    def create(self, validated_data):
+        # Ensure parameters has a default value if not provided
+        if "parameters" not in validated_data:
+            validated_data["parameters"] = {}
+        return super().create(validated_data)
+------
+./src/infrastructure/django/__init__.py
+from celery import app as celery_app
+
+__all__ = ("celery_app",)
+------
+./src/infrastructure/django/apps.py
+from django.apps import AppConfig
+
+
+class MannKendallConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "mann_kendall"
+    verbose_name = "Mann Kendall Analysis"
+
+
+class DjangoConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "src.infrastructure.django"
+    label = "django"
+    verbose_name = "Mann Kendall Analysis"
+------
+./src/infrastructure/django/admin.py
+from django.contrib import admin
+
+from .models import AnalysisModel, DatasetModel, ProjectModel
+
+
+@admin.register(ProjectModel)
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = ("name", "owner", "created_at", "updated_at")
+    list_filter = ("created_at", "updated_at")
+    search_fields = ("name", "description", "owner__username")
+    date_hierarchy = "created_at"
+
+
+@admin.register(DatasetModel)
+class DatasetAdmin(admin.ModelAdmin):
+    list_display = ("name", "project", "uploaded_at", "processed")
+    list_filter = ("processed", "uploaded_at")
+    search_fields = ("name", "project__name")
+    date_hierarchy = "uploaded_at"
+
+
+@admin.register(AnalysisModel)
+class AnalysisAdmin(admin.ModelAdmin):
+    list_display = ("dataset", "status", "created_at", "completed_at")
+    list_filter = ("status", "created_at", "completed_at")
+    search_fields = ("dataset__name", "error_message")
+    date_hierarchy = "created_at"
+    readonly_fields = ("created_at", "completed_at")
+------
+./src/infrastructure/django/settings.py
+import os
+from pathlib import Path
+
+import dj_database_url
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente
+load_dotenv()
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv("DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+
+# Application definition
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "corsheaders",
+    "django_celery_results",
+    # "mann_kendall.apps.MannKendallConfig",
+    "src.infrastructure.django.apps.DjangoConfig",
+]
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+ROOT_URLCONF = "src.infrastructure.django.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "src.infrastructure.django.wsgi.application"
+
+# Database
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL"), conn_max_age=600, ssl_require=True
+    )
+}
+
+# REST Framework
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}
+
+# Internationalization
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# Media files
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# CORS
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOW_CREDENTIALS = True
+
+# Celery
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+------
+./src/infrastructure/django/urls.py
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path
+from django.views.generic import RedirectView
+from rest_framework import routers
+
+from src.infrastructure.django.views import (
+    AnalysisViewSet,
+    DatasetViewSet,
+    ProjectViewSet,
+)
+
+# Create the router
+router = routers.DefaultRouter()
+router.register(r"projects", ProjectViewSet)
+router.register(r"datasets", DatasetViewSet)
+router.register(r"analyses", AnalysisViewSet)
+
+urlpatterns = [
+    # Redirect root URL to API
+    path("", RedirectView.as_view(url="/api/", permanent=False)),
+    path("admin/", admin.site.urls),
+    path("api/", include(router.urls)),
+    path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+------
+./src/infrastructure/django/views.py
+# src/infrastructure/django/views.py
+import pandas as pd
+from asgiref.sync import async_to_sync
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+
+from src.application.use_cases.perform_mann_kendall_analysis import (
+    PerformMannKendallAnalysis,
+)
+from src.infrastructure.django.serializers import (
+    AnalysisSerializer,
+    DatasetSerializer,
+    ProjectSerializer,
+)
+from src.infrastructure.repositories.django_analysis_repository import (
+    DjangoAnalysisRepository,
+)
+
+from .models import AnalysisModel, DatasetModel, ProjectModel
+
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = ProjectModel.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class DatasetViewSet(viewsets.ModelViewSet):
+    queryset = DatasetModel.objects.all()
+    serializer_class = DatasetSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(project__owner=self.request.user)
+
+    @action(detail=True, methods=["post"])
+    def analyze(self, request: Request, pk=None) -> Response:
+        """
+        Perform Mann-Kendall analysis on the dataset
+        """
+        dataset = self.get_object()
+
+        try:
+            # Read the dataset file
+            file_path = dataset.file.path
+            df = pd.read_excel(file_path, header=None, index_col=0)
+
+            # Initialize use case and repository
+            repository = DjangoAnalysisRepository()
+            use_case = PerformMannKendallAnalysis(repository)
+
+            # Execute analysis using async_to_sync
+            results = async_to_sync(use_case.execute)(dataset.id, df)
+
+            # Update dataset status
+            dataset.processed = True
+            dataset.save()
+
+            # Return success response
+            return Response(
+                {
+                    "message": "Analysis completed successfully",
+                    "results_count": len(results),
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": f"Analysis failed: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class AnalysisViewSet(viewsets.ModelViewSet):
+    queryset = AnalysisModel.objects.all()
+    serializer_class = AnalysisSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(dataset__project__owner=self.request.user)
+
+    @action(detail=False, methods=["get"])
+    def dataset_results(self, request):
+        """
+        Get all analysis results for a specific dataset
+        """
+        dataset_id = request.query_params.get("dataset_id")
+        if not dataset_id:
+            return Response(
+                {"error": "dataset_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        repository = DjangoAnalysisRepository()
+        # Convert async operation to sync
+        results = async_to_sync(repository.list_by_dataset)(dataset_id)
+
+        return Response(
+            [
+                {
+                    "well_name": r.well_name,
+                    "parameter": r.parameter,
+                    "trend": r.trend,
+                    "statistic": r.statistic,
+                    "coefficient_variation": r.coefficient_variation,
+                    "confidence_factor": r.confidence_factor,
+                    "data_points": r.data_points,
+                    "minimum_value": r.minimum_value,
+                    "maximum_value": r.maximum_value,
+                    "mean_value": r.mean_value,
+                    "analysis_date": r.analysis_date,
+                }
+                for r in results
+            ]
+        )
+------
+./src/infrastructure/django/wsgi.py
+"""
+WSGI config for project.
+"""
+
+import os
+
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "src.infrastructure.django.settings")
+
+application = get_wsgi_application()
+------
+./src/infrastructure/services/__init__.py
+------
+./src/domain/value_objects/__init__.py
+------
+./src/domain/__init__.py
+------
+./src/domain/ports/analysis_repository.py
+from abc import ABC, abstractmethod
+from typing import List, Optional
+from uuid import UUID
+
+from src.domain.entities.analysis_result import AnalysisResult
+
+
+class AnalysisRepository(ABC):
+    """Interface for analysis results repository"""
+
+    @abstractmethod
+    async def save(self, result: AnalysisResult) -> AnalysisResult:
+        """Save analysis result"""
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, result_id: UUID) -> Optional[AnalysisResult]:
+        """Get analysis result by ID"""
+        pass
+
+    @abstractmethod
+    async def list_by_dataset(self, dataset_id: UUID) -> List[AnalysisResult]:
+        """List all results for a dataset"""
+        pass
+------
+./src/domain/ports/__init__.py
+------
+./src/domain/ports/project_repository.py
+from abc import ABC, abstractmethod
+from typing import List, Optional
+from uuid import UUID
+
+from src.domain.entities.project import Project
+
+
+class ProjectRepository(ABC):
+    """Interface para repositório de projetos"""
+
+    @abstractmethod
+    async def save(self, project: Project) -> Project:
+        """Salva um projeto no repositório"""
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, project_id: UUID) -> Optional[Project]:
+        """Recupera um projeto pelo ID"""
+        pass
+
+    @abstractmethod
+    async def list_by_owner(self, owner_id: UUID) -> List[Project]:
+        """Lista todos os projetos de um proprietário"""
+        pass
+
+    @abstractmethod
+    async def delete(self, project_id: UUID) -> None:
+        """Remove um projeto do repositório"""
+        pass
+
+    @abstractmethod
+    async def update(self, project: Project) -> Project:
+        """Atualiza um projeto existente"""
+        pass
+------
+./src/domain/entities/analysis_result.py
+from dataclasses import dataclass
+from datetime import datetime
+from uuid import UUID
+
+
+@dataclass
+class AnalysisResult:
+    """Entity representing the result of a Mann-Kendall analysis"""
+
+    well_name: str
+    parameter: str
+    trend: str
+    statistic: float
+    coefficient_variation: float
+    confidence_factor: float
+    analysis_date: datetime
+    id: UUID
+    dataset_id: UUID
+    data_points: int
+    minimum_value: float
+    maximum_value: float
+    mean_value: float
+------
+./src/domain/entities/__init__.py
+------
+./src/domain/entities/project.py
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
+from uuid import UUID, uuid4
+
+
+@dataclass
+class Project:
+    """Entidade Project do domínio"""
+
+    name: str
+    description: Optional[str]
+    owner_id: UUID
+    created_at: datetime
+    updated_at: datetime
+    id: UUID = uuid4()
+
+    def update_description(self, new_description: str) -> None:
+        """Atualiza a descrição do projeto"""
+        self.description = new_description
+        self.updated_at = datetime.utcnow()
+
+    @classmethod
+    def create(cls, name: str, description: str, owner_id: UUID) -> "Project":
+        """Factory method para criar um novo projeto"""
+        now = datetime.utcnow()
+        return cls(
+            name=name,
+            description=description,
+            owner_id=owner_id,
+            created_at=now,
+            updated_at=now,
+        )
