@@ -27,7 +27,7 @@ def test_load_excel_data_path():
 
 def test_load_excel_invalid_file():
     """Test loading Excel data from an invalid file."""
-    with pytest.raises(Exception):
+    with pytest.raises(FileNotFoundError):  # Or the specific exception type that should be raised
         load_excel_data("non_existent_file.xlsx")
 
 
