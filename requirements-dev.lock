@@ -132,8 +132,6 @@ tzdata==2025.1
     # via pandas
 urllib3==2.3.0
     # via requests
-watchdog==6.0.0
-    # via mann-kendall-automated
 xlrd==2.0.1
     # via mann-kendall-automated
 xlsxwriter==3.2.2
