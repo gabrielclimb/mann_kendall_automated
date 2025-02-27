@@ -1,113 +1,161 @@
 # Development Guide
 
-This guide provides instructions for setting up a local development environment for the Mann Kendall Automated (MKA) project using rye, a modern Python packaging and project management tool.
-
-## Prerequisites
-
-1. Python: Ensure Python is installed on your system. Verify the installation with:
-   ```bash
-   python --version
-   ```
-
-2. Git: Make sure Git is installed. Verify with:
-   ```bash
-   git --version
-   ```
-
-3. Rye: Install rye by following the instructions in the [rye documentation](https://rye-up.com/guide/installation/).
+This guide provides instructions for developers who want to contribute to Mann Kendall Automated.
 
 ## Setting Up the Development Environment
 
-1. Clone the MKA repository:
+### Prerequisites
+
+- Python 3.8 or later
+- Git
+- [Rye](https://rye-up.com/) (recommended) or other Python environment manager
+
+### Setup with Rye (Recommended)
+
+1. Clone the repository:
    ```bash
    git clone https://github.com/gabrielclimb/mann_kendall_automated.git
    cd mann_kendall_automated
    ```
 
-2. Set up the project environment and install dependencies:
-   ```bash
-   rye sync
-   ```
-   This command creates a virtual environment, installs all project dependencies, and creates a lock file if it doesn't exist.
-
-## Development Workflow
-
-Rye provides several commands to manage your project:
-
-1. Add a new dependency:
-   ```bash
-   rye add <package-name>
-   ```
-
-2. Add a development dependency:
-   ```bash
-   rye add --dev <package-name>
-   ```
-
-3. Update dependencies:
+2. Set up the environment with Rye:
    ```bash
    rye sync
    ```
 
-4. Run the Streamlit app:
+3. Activate the environment:
    ```bash
-   rye run stream
+   . .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
-5. Run tests:
+### Alternative Setup (without Rye)
+
+1. Clone the repository:
    ```bash
-   rye run test
+   git clone https://github.com/gabrielclimb/mann_kendall_automated.git
+   cd mann_kendall_automated
    ```
 
-6. Update requirements.txt:
+2. Create and activate a virtual environment:
    ```bash
-   rye run req
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-## Pre-commit Setup
-
-1. Install pre-commit:
+3. Install dependencies:
    ```bash
-   rye add --dev pre-commit
+   pip install -e .
+   pip install pytest pytest-cov black isort ruff
    ```
-
-2. Set up the git hook scripts:
-   ```bash
-   pre-commit install
-   ```
-
-## Linting
-
-Run linting checks with:
-```bash
-rye run lint
-```
-This executes all pre-commit hooks against all files.
-
-## Testing
-
-Run the test suite with:
-```bash
-rye run test
-```
-This runs pytest, clears the cache before running tests, and measures code coverage of the source code in the src directory.
 
 ## Project Structure
 
-- `src/`: Contains the main source code
-- `tests/`: Contains test files
-- `pyproject.toml`: Defines project metadata and dependencies
-- `.pre-commit-config.yaml`: Configures pre-commit hooks
+The project follows a modular architecture:
 
-## Best Practices
+```
+mann_kendall_automated/
+├── app.py                  # Main entry point for Streamlit app
+├── mann_kendall/           # Main package
+│   ├── core/               # Core functionality
+│   │   ├── mann_kendall.py # Statistical implementation
+│   │   └── processor.py    # Data processing logic
+│   ├── data/               # Data handling
+│   │   ├── loader.py       # File loading functionality
+│   │   └── cleaner.py      # Data cleaning
+│   ├── ui/                 # UI components
+│   │   ├── app.py          # Streamlit app
+│   │   ├── visualizer.py   # Plotting functionality
+│   │   └── download.py     # Export functionality
+│   └── utils/              # Utilities
+│       └── progress.py     # Progress bar
+├── scripts/                # CLI scripts
+│   └── mann_kendall_cli.py # Command line interface
+├── tests/                  # Unit and integration tests
+└── examples/               # Example data and notebooks
+```
 
-1. Always use `rye run` to execute scripts defined in `pyproject.toml`.
-2. Keep `pyproject.toml` up to date with all project dependencies.
-3. Run linting and tests before committing changes.
-4. Use pre-commit hooks to maintain code quality.
+## Development Workflow
 
-## Conclusion
+### Code Style
 
-You now have a local development environment set up for the MKA project using rye. Start contributing by creating new features or fixing bugs. Ensure you follow the project's coding standards and use pre-commit checks to maintain code quality.
+We use the following tools to maintain code quality:
 
-For any questions or issues, please refer to the project's issue tracker on GitHub.
+- **Black**: For code formatting
+- **isort**: For import sorting
+- **Ruff**: For linting
+
+Run them with:
+
+```bash
+black mann_kendall tests scripts
+isort mann_kendall tests scripts
+ruff check mann_kendall tests scripts
+```
+
+### Running Tests
+
+Run tests with pytest:
+
+```bash
+pytest
+```
+
+For test coverage:
+
+```bash
+pytest --cov=mann_kendall
+```
+
+### Adding New Features
+
+When adding new features:
+
+1. Create a new branch:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. Write tests for your feature first
+
+3. Implement your feature
+
+4. Ensure all tests pass
+
+5. Submit a pull request
+
+### Documentation
+
+- Update docstrings for all public functions and classes
+- Keep the README.md updated with any new features
+- Add examples for new functionality
+
+## Release Process
+
+1. Update version in `pyproject.toml`
+2. Update CHANGELOG.md
+3. Create a new GitHub release with release notes
+4. If using Rye:
+   ```bash
+   rye build
+   rye publish
+   ```
+   
+   If not using Rye:
+   ```bash
+   python -m build
+   python -m twine upload dist/*
+   ```
+
+## CI/CD
+
+GitHub Actions are used for:
+- Running tests
+- Checking code style
+- Building and publishing releases
+
+## Additional Resources
+
+- [Rye Documentation](https://rye-up.com/guide/)
+- [Streamlit Documentation](https://docs.streamlit.io/)
+- [Mann-Kendall Test Documentation](http://vsp.pnnl.gov/help/Vsample/Design_Trend_Mann_Kendall.htm)
+- [Pandas Documentation](https://pandas.pydata.org/docs/)

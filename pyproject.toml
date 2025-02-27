@@ -1,9 +1,19 @@
 [project]
 name = "mann-kendall-automated"
 version = "0.1.0"
-description = "Add your description here"
+description = "Automated Mann-Kendall trend analysis for environmental engineering and geology"
 authors = [
-    { name = "Gabriel Barbosa Soares", email = "gabrielclimb@gmail.com" },
+    {name = "Gabriel Barbosa Soares", email = "gabriel@example.com"},
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Visualization",
 ]
 dependencies = [
     "streamlit>=1.38.0",
@@ -13,9 +23,15 @@ dependencies = [
     "scipy>=1.14.1",
     "openpyxl>=3.1.5",
     "plotly>=5.24.0",
+    "watchdog>=6.0.0",
 ]
-readme = "README.md"
-requires-python = ">= 3.11"
+
+[project.scripts]
+mann-kendall = "scripts.mann_kendall_cli:main"
+
+[project.urls]
+Homepage = "https://github.com/gabrielclimb/mann_kendall_automated"
+"Bug Tracker" = "https://github.com/gabrielclimb/mann_kendall_automated/issues"
 
 [build-system]
 requires = ["hatchling"]
@@ -24,19 +40,37 @@ build-backend = "hatchling.build"
 [tool.rye]
 managed = true
 dev-dependencies = [
-    "pytest>=8.3.2",
-    "pytest-cov>=5.0.0",
-    "ruff>=0.6.3",
-    "uv>=0.4.2",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "ruff>=0.0.272",
 ]
 
 [tool.rye.scripts]
 req = "uv pip compile pyproject.toml -o requirements.txt"
 stream = "streamlit run app.py"
-test = "pytest src/ --cov=src --cache-clear"
+test = "pytest tests/ --cov=mann_kendall --cache-clear"
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mann_kendall_automated"]
+packages = ["mann_kendall"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+select = ["E", "F", "I", "UP"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
