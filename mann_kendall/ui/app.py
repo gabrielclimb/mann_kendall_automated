@@ -1,5 +1,5 @@
 # Description: Main Streamlit app for the Mann Kendall Automated tool.
-
+# ruff: noqa: E501
 __author__ = "Gabriel Barbosa Soares"
 
 import pandas as pd

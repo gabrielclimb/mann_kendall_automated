@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Tests for the data cleaner module."""
 
 import pandas as pd
 import pytest
 
-from mann_kendall.data.cleaner import get_columns_with_incorrect_values, string_to_float, string_test
+from mann_kendall.data.cleaner import (
+    get_columns_with_incorrect_values,
+    string_test,
+    string_to_float,
+)
 
 
 def test_string_to_float_numeric():

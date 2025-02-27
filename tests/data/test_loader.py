@@ -1,15 +1,14 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Tests for the data loader module."""
 
 import os
-import pandas as pd
-import pytest
 from pathlib import Path
 
-from mann_kendall.data.loader import load_excel_data, validate_input_format
+import pandas as pd
+import pytest
 
+from mann_kendall.data.loader import load_excel_data, validate_input_format
 
 # Get the path to the test files
 TEST_FILES_DIR = Path(__file__).parent.parent / "files"

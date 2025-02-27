@@ -1,17 +1,15 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Tests for visualizer.py module."""
 
+from unittest.mock import MagicMock, patch
+
 import pandas as pd
-import pytest
-from unittest.mock import patch, MagicMock
 
 from mann_kendall.ui.visualizer import (
-    filter_well_component,
-    get_desired_component,
     choose_log_scale,
     create_trend_plot,
+    filter_well_component,
 )
 
 
@@ -57,8 +55,9 @@ def test_choose_log_scale_linear(mock_selectbox):
 @patch("plotly.express.line")
 @patch("streamlit.plotly_chart")
 @patch("streamlit.warning")
-def test_create_trend_plot_log_scale(mock_warning, mock_plotly_chart, mock_line, mock_choose_log_scale, 
-                                     mock_filter, mock_get_component, mock_multiselect):
+def test_create_trend_plot_log_scale(
+    mock_warning, mock_plotly_chart, mock_line, mock_choose_log_scale, 
+    mock_filter, mock_get_component, mock_multiselect):
     """Test create_trend_plot with log scale."""
     # Mock data
     results = pd.DataFrame({"Well": ["Well1", "Well2"], "Analise": ["Component1", "Component1"]})
@@ -147,8 +146,9 @@ def test_create_trend_plot_log_scale_with_zeros(mock_warning, mock_plotly_chart,
 @patch("plotly.express.line")
 @patch("streamlit.plotly_chart")
 @patch("streamlit.warning")
-def test_create_trend_plot_linear_scale(mock_warning, mock_plotly_chart, mock_line, mock_choose_log_scale,
-                                       mock_filter, mock_get_component, mock_multiselect):
+def test_create_trend_plot_linear_scale(
+    mock_warning, mock_plotly_chart, mock_line, mock_choose_log_scale,
+    mock_filter, mock_get_component, mock_multiselect):
     """Test create_trend_plot with linear scale."""
     # Mock data
     results = pd.DataFrame({"Well": ["Well1", "Well2"], "Analise": ["Component1", "Component1"]})

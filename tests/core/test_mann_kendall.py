@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Tests for mann_kendall.py module."""
 
 import numpy as np
-import pytest
 
 from mann_kendall.core.mann_kendall import mk_test
 

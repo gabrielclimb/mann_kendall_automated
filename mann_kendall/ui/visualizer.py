@@ -85,7 +85,7 @@ def create_trend_plot(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
             
             if min_value <= 0:
                 st.warning(
-                    f"Data contains zeros or negative values which can't be displayed on log scale. "
+                    f"Data contains zeros or negative values which can't be displayed on log scale."
                     f"Minimum value found: {min_value}. "
                     f"Non-positive values will be replaced with a small positive number."
                 )
@@ -96,13 +96,19 @@ def create_trend_plot(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
                 
                 # Create a copy of the column with replacements for log transformation
                 df_plot[log_component_name] = df_plot[desired_component].copy()
-                df_plot.loc[df_plot[log_component_name] <= 0, log_component_name] = replacement_value
+                (
+                    df_plot.loc[
+                        df_plot[log_component_name] <= 0, log_component_name
+                        ]
+                ) = replacement_value
                 
                 # Now apply log transformation
                 df_plot[log_component_name] = np.log10(df_plot[log_component_name])
                 
                 # Add a note about replacement to the chart title
-                title = f"{', '.join(desired_wells)} x {desired_component} (log scale with replaced values)"
+                title =(
+                    f"""{', '.join(desired_wells)} x {desired_component} 
+                    d(log scale with replaced values)""")
                 plot_component = log_component_name
             else:
                 # No replacement needed, just log transform
