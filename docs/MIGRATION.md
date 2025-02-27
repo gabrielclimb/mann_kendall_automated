@@ -79,6 +79,6 @@ To add new features:
 
 ## Additional Resources
 
-- See the updated [README.md](../README.md) for an overview of the new structure
-- Check the [examples](../examples) directory for usage examples
-- Review the [Development Guide](DEVELOPMENT.md) for development guidelines
+- See the updated [README.md](/README.md) for an overview of the new structure
+- Check the [examples](/examples) directory for usage examples
+- Review the [Development Guide](/DEVELOPMENT.md) for development guidelines
