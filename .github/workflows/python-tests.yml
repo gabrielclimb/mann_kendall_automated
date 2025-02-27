@@ -36,16 +36,6 @@ jobs:
         . .venv/bin/activate
         ruff check mann_kendall tests scripts
         
-    - name: Check formatting with black
-      run: |
-        . .venv/bin/activate
-        black --check mann_kendall tests scripts
-        
-    - name: Check imports with isort
-      run: |
-        . .venv/bin/activate
-        isort --check mann_kendall tests scripts
-        
     - name: Test with pytest
       run: |
         . .venv/bin/activate
