@@ -1,0 +1,57 @@
+name: Python Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10']
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install Rye
+      run: |
+        curl -sSf https://rye-up.com/get | bash
+        echo "$HOME/.rye/shims" >> $GITHUB_PATH
+        
+    - name: Install dependencies with Rye
+      run: |
+        rye sync
+        . .venv/bin/activate
+        
+    - name: Lint with ruff
+      run: |
+        . .venv/bin/activate
+        ruff check mann_kendall tests scripts
+        
+    - name: Check formatting with black
+      run: |
+        . .venv/bin/activate
+        black --check mann_kendall tests scripts
+        
+    - name: Check imports with isort
+      run: |
+        . .venv/bin/activate
+        isort --check mann_kendall tests scripts
+        
+    - name: Test with pytest
+      run: |
+        . .venv/bin/activate
+        pytest --cov=mann_kendall tests/
+        
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        fail_ci_if_error: false
