@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Tests for visualizer.py module."""
 
 from unittest.mock import MagicMock, patch
