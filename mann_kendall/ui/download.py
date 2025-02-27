@@ -1,6 +1,6 @@
 import base64
-from io import BytesIO
 from datetime import datetime
+from io import BytesIO
 from random import randint
 
 import pandas as pd

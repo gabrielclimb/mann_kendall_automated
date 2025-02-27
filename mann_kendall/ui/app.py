@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# Description: Main Streamlit app for the Mann Kendall Automated tool.
 
 __author__ = "Gabriel Barbosa Soares"
 
@@ -23,7 +22,7 @@ def main() -> None:
         page_title="Mann Kendall Automated",
         page_icon="📈",
         layout="wide",
-        initial_sidebar_state="expanded"
+        initial_sidebar_state="expanded",
     )
 
     # Header and description
@@ -36,10 +35,8 @@ def main() -> None:
     # File uploader in sidebar
     with st.sidebar:
         st.header("Input Data")
-        file_upload = st.file_uploader(
-            label="Upload Excel File", type=["xlsx", "xls"]
-        )
-        
+        file_upload = st.file_uploader(label="Upload Excel File", type=["xlsx", "xls"])
+
         # Show input format example
         with st.expander("Input Format Example"):
             st.markdown("""
@@ -57,25 +54,27 @@ def main() -> None:
                 # Load and process the data
                 df = load_excel_data(file_upload.getvalue())
                 results, dataframe = generate_mann_kendall(df)
-                
+
                 # Check for incorrect values
                 if get_columns_with_incorrect_values(dataframe):
-                    st.warning("⚠️ The input file contains some incorrect values. Please check and fix them for accurate results.")
-                
+                    st.warning(
+                        "⚠️ The input file contains some incorrect values. Please check and fix them for accurate results."
+                    )
+
                 # Add download link to sidebar
                 with st.sidebar:
                     st.markdown("### Download Results")
                     st.markdown(get_table_download_link(results), unsafe_allow_html=True)
-                
+
                 # Create tabs for different views
                 tab1, tab2 = st.tabs(["Visualization", "Results Table"])
-                
+
                 with tab1:
                     create_trend_plot(results, dataframe)
-                
+
                 with tab2:
                     display_results_table(results)
-                
+
         except pd.errors.EmptyDataError:
             st.error("❌ The uploaded file is empty. Please upload a file with data.")
         except pd.errors.ParserError:
@@ -85,7 +84,9 @@ def main() -> None:
         except TypeError as te:
             st.error(f"❌ Type Error: {str(te)}. Please check your data types.")
         except Exception as e:
-            st.error(f"❌ An unexpected error occurred: {str(e)}. Please try again or contact support.")
+            st.error(
+                f"❌ An unexpected error occurred: {str(e)}. Please try again or contact support."
+            )
     else:
         # Show instructions when no file is uploaded
         st.info("👈 Please upload an Excel file using the sidebar to begin analysis.")

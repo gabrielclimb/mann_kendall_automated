@@ -1,4 +1,4 @@
-from typing import Union, BinaryIO
+from typing import BinaryIO, Union
 
 import pandas as pd
 

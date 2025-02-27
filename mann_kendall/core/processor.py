@@ -38,7 +38,7 @@ def process_well_data(well_name: str, df_transposto: pd.DataFrame, columns: list
     """
     results = pd.DataFrame()
     df_temp = df_transposto[df_transposto.well == well_name]
-    
+
     for column in columns:
         try:
             if df_temp.loc[:, column].dropna().count() > 3:
@@ -49,7 +49,7 @@ def process_well_data(well_name: str, df_transposto: pd.DataFrame, columns: list
         except TypeError:
             values = df_temp.loc[:, column].apply(string_to_float).fillna(0).values
             raise TypeError(f"incorrect values: {values}")
-            
+
     return results
 
 
@@ -78,9 +78,11 @@ def generate_mann_kendall(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]
 
     results = pd.DataFrame()
     print_progress_bar(0, len(wells), prefix="Processing wells:", suffix="Complete", length=50)
-    
+
     for i, well in enumerate(wells):
-        print_progress_bar(i + 1, len(wells), prefix="Processing wells:", suffix="Complete", length=50)
+        print_progress_bar(
+            i + 1, len(wells), prefix="Processing wells:", suffix="Complete", length=50
+        )
         well_results = process_well_data(well, df_transposto, columns)
         results = pd.concat([results, well_results], ignore_index=True)
 
@@ -92,5 +94,5 @@ def generate_mann_kendall(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]
         "Coefficient of Variation",
         "Confidence Factor",
     ]
-    
+
     return results, df_transposto
