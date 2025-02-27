@@ -1,15 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Basic usage example for Mann Kendall Automated package.
 """
 
-import pandas as pd
 import matplotlib.pyplot as plt
 
-from mann_kendall.data.loader import load_excel_data
 from mann_kendall.core.processor import generate_mann_kendall
+from mann_kendall.data.loader import load_excel_data
 
 
 def main():
