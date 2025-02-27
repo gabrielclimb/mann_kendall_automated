@@ -15,6 +15,7 @@ altair==5.4.1
 attrs==24.2.0
     # via jsonschema
     # via referencing
+black==25.1.0
 blinker==1.8.2
     # via streamlit
 cachetools==5.5.0
@@ -24,8 +25,9 @@ certifi==2024.8.30
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
+    # via black
     # via streamlit
-coverage==7.6.1
+coverage==7.6.12
     # via pytest-cov
 et-xmlfile==1.1.0
     # via openpyxl
@@ -37,6 +39,7 @@ idna==3.8
     # via requests
 iniconfig==2.0.0
     # via pytest
+isort==6.0.1
 jinja2==3.1.4
     # via altair
     # via pydeck
@@ -50,6 +53,8 @@ markupsafe==2.1.5
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
+mypy-extensions==1.0.0
+    # via black
 narwhals==1.6.0
     # via altair
 numpy==2.1.0
@@ -62,14 +67,19 @@ openpyxl==3.1.5
     # via mann-kendall-automated
 packaging==24.1
     # via altair
+    # via black
     # via plotly
     # via pytest
     # via streamlit
 pandas==2.2.2
     # via mann-kendall-automated
     # via streamlit
+pathspec==0.12.1
+    # via black
 pillow==10.4.0
     # via streamlit
+platformdirs==4.3.6
+    # via black
 plotly==5.24.0
     # via mann-kendall-automated
 pluggy==1.5.0
@@ -82,9 +92,9 @@ pydeck==0.9.1
     # via streamlit
 pygments==2.18.0
     # via rich
-pytest==8.3.2
+pytest==8.3.4
     # via pytest-cov
-pytest-cov==5.0.0
+pytest-cov==6.0.0
 python-dateutil==2.9.0.post0
     # via pandas
 pytz==2024.1
@@ -99,7 +109,7 @@ rich==13.8.0
 rpds-py==0.20.0
     # via jsonschema
     # via referencing
-ruff==0.6.3
+ruff==0.9.7
 scipy==1.14.1
     # via mann-kendall-automated
 six==1.16.0
@@ -122,7 +132,6 @@ tzdata==2024.1
     # via pandas
 urllib3==2.2.2
     # via requests
-uv==0.4.2
 xlrd==2.0.1
     # via mann-kendall-automated
 xlsxwriter==3.2.0
