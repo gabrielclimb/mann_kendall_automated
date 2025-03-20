@@ -1,3 +1,4 @@
+
 <div style="text-align: center;">
   <img src="docs/images/logo.png" alt="Logo" style="width: 300px; height: 300px;">
 </div>
@@ -17,7 +18,10 @@ Mann Kendall Automated (MKA) is a tool for performing the Mann-Kendall statistic
 - **Export Results**: Download results as Excel files
 - **Interactive Visualizations**: Plot trends with Plotly
 - **Data Validation**: Automatically detect and report invalid data
+## Support
+<a href="https://www.buymeacoffee.com/gabrielsoares"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=gabrielsoares&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
 
+If this project is useful to you, consider support it.
 ## Installation
 
 ### Using pip
