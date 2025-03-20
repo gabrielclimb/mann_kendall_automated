@@ -1,20 +1,36 @@
-
-import { PlusCircle, FileSpreadsheet } from 'lucide-react';
+import { useState } from 'react';
+import { PlusCircle, Search, Filter } from 'lucide-react';
 import { useProjects, useCreateProject } from '../hooks/useApi';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
 export const ProjectsPage = () => {
     const { data: projects, isLoading, error } = useProjects();
     const createProject = useCreateProject();
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handleNewProject = () => {
         createProject.mutate({
             name: "New Project",
-            description: "Description for new project"
+            description: "Description for new project",
+            processed: false
         });
     };
+
+    const filteredProjects = projects?.filter(project =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
     if (isLoading) {
         return (
@@ -36,45 +52,64 @@ export const ProjectsPage = () => {
     }
 
     return (
-        <div>
+        <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-                <button
-                    onClick={handleNewProject}
-                    disabled={createProject.isPending}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                >
+                <Button onClick={handleNewProject} disabled={createProject.isPending}>
                     <PlusCircle className="h-5 w-5 mr-2" />
                     New Project
-                </button>
+                </Button>
             </div>
 
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                <ul className="divide-y divide-gray-200">
-                    {projects?.map((project) => (
-                        <li key={project.id}>
-                            <div className="px-4 py-4 sm:px-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <FileSpreadsheet className="h-5 w-5 text-gray-400 mr-3" />
-                                        <p className="text-sm font-medium text-blue-600 truncate">{project.name}</p>
-                                    </div>
-                                </div>
-                                <div className="mt-2 sm:flex sm:justify-between">
-                                    <div className="sm:flex">
-                                        <p className="flex items-center text-sm text-gray-500">
-                                            Last updated {new Date(project.updated_at).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                        Owner: {project.owner}
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            <Card className="mb-6">
+                <CardHeader>
+                    <CardTitle>Project List</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex space-x-2 mb-4">
+                        <div className="relative flex-grow">
+                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                            <Input
+                                type="text"
+                                placeholder="Search projects..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-8"
+                            />
+                        </div>
+                        <Button variant="outline">
+                            <Filter className="h-4 w-4 mr-2" />
+                            Filter
+                        </Button>
+                    </div>
+
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Created At</TableHead>
+                                <TableHead>Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredProjects?.map((project) => (
+                                <TableRow key={project.id}>
+                                    <TableCell className="font-medium">{project.name}</TableCell>
+                                    <TableCell>{project.description}</TableCell>
+                                    <TableCell>{new Date(project.created_at).toLocaleDateString()}</TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${project.processed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                            {project.processed ? 'Completed' : 'Pending'}
+                                        </span>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
 
             {createProject.error && (
                 <Alert variant="destructive" className="mt-4">
@@ -87,3 +122,4 @@ export const ProjectsPage = () => {
         </div>
     );
 };
+

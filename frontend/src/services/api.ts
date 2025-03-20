@@ -32,10 +32,11 @@ api.interceptors.response.use(
 export interface Project {
     id: string;
     name: string;
-    description: string | null;
+    description?: string;
     owner: string;
     created_at: string;
     updated_at: string;
+    processed: boolean;
 }
 
 export interface Dataset {
@@ -50,17 +51,21 @@ export interface Dataset {
 export interface AnalysisResult {
     id: string;
     dataset: string;
-    well_name: string;
-    parameter: string;
-    trend: string;
-    statistic: number;
-    coefficient_variation: number;
-    confidence_factor: number;
-    data_points: number;
-    minimum_value: number;
-    maximum_value: number;
-    mean_value: number;
-    analysis_date: string;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    results: {
+        well_name: string;
+        parameter: string;
+        trend: string;
+        statistic: number;
+        coefficient_variation: number;
+        confidence_factor: number;
+        data_points: number;
+        minimum_value: number;
+        maximum_value: number;
+        mean_value: number;
+    }[];
+    created_at: string;
+    completed_at: string | null;
 }
 
 // API functions
@@ -93,22 +98,15 @@ export const datasetsApi = {
             .then(res => res.data),
 
     // Upload new dataset
-    upload: (projectId: string, name: string, file: File) => {
-        const formData = new FormData();
-        formData.append('project', projectId);
-        formData.append('name', name);
-        formData.append('file', file);
-
-        return api.post<Dataset>('/datasets/', formData, {
+    upload: (data: { projectId: string; name: string; file: File }) =>
+        api.post<Dataset>('/datasets/', data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
-        }).then(res => res.data);
-    },
+        }).then(res => res.data),
 
-    // Start analysis for a dataset
     analyze: (datasetId: string) =>
-        api.post<{ message: string; results_count: number }>(`/datasets/${datasetId}/analyze/`)
+        api.post<AnalysisResult>(`/datasets/${datasetId}/analyze/`)
             .then(res => res.data)
 };
 

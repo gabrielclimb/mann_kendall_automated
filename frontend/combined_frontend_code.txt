@@ -1,7 +1,7 @@
 ------
 ./index.html
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -66,7 +66,8 @@ export default {
         },
     },
     plugins: [],
-}------
+}
+------
 ./eslint.config.js
 import js from '@eslint/js'
 import globals from 'globals'
@@ -110,14 +111,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-})------
+})
+------
 ./postcss.config.js
 export default {
     plugins: {
         tailwindcss: {},
         autoprefixer: {},
     },
-}------
+}
+------
 ./src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -125,38 +128,63 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Navbar } from './components/layout/Navbar';
 import { HomePage } from './pages/HomePage';
 import { ProjectsPage } from './pages/ProjectsPage';
+import { LoginPage } from './pages/LoginPage';
 import { AnalysisPage } from './pages/AnalysisPage';
+import { ProtectedRoute } from './components/routes/ProtectedRoute';
 
 const queryClient = new QueryClient();
 
+// function App() {
+//     return (
+//         <QueryClientProvider client={queryClient}>
+//             <Router>
+//                 <div className="min-h-screen bg-background text-foreground">
+//                     <Navbar />
+//                     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+//                         <Routes>
+//                             <Route path="/login" element={<LoginPage />} />
+//                             <Route path="/" element={<HomePage />} />
+//                             <Route path="/projects" element={<ProjectsPage />} />
+//                             <Route path="/analysis" element={<AnalysisPage />} />
+//                         </Routes>
+//                     </main>
+//                 </div>
+//             </Router>
+//             <ReactQueryDevtools initialIsOpen={false} />
+//         </QueryClientProvider>
+//     );
+// }
+
 function App() {
     return (
-        <QueryClientProvider client={queryClient}>
-            <Router>
-                <div className="min-h-screen bg-gray-50">
-                    <Navbar />
+        <Router>
+            <Routes>
+                {/* Rota pública para login */}
+                <Route path="/login" element={<LoginPage />} />
 
-                    {/* Main Content */}
-                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <Routes>
-                            <Route path="/" element={<HomePage />} />
-                            <Route path="/projects" element={<ProjectsPage />} />
-                            <Route path="/analysis" element={<AnalysisPage />} />
-                        </Routes>
-                    </main>
-                </div>
-            </Router>
-            <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+                {/* Rotas protegidas */}
+                <Route
+                    path="/"
+                    element={
+                        <ProtectedRoute>
+                            <HomePage />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </Router>
     );
 }
 
-export default App;------
+export default App;
+------
 ./src/main.tsx
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+
+document.documentElement.setAttribute('data-theme', 'light');
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -170,7 +198,167 @@ import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
-}------
+}
+------
+./src/components/ui/tabs.tsx
+import * as React from "react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { cn } from "../../utils/cn"
+
+const Tabs = TabsPrimitive.Root
+
+const TabsList = React.forwardRef<
+    React.ElementRef<typeof TabsPrimitive.List>,
+    React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+    <TabsPrimitive.List
+        ref={ref}
+        className={cn(
+            "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+            className
+        )}
+        {...props}
+    />
+))
+TabsList.displayName = TabsPrimitive.List.displayName
+
+const TabsTrigger = React.forwardRef<
+    React.ElementRef<typeof TabsPrimitive.Trigger>,
+    React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+    <TabsPrimitive.Trigger
+        ref={ref}
+        className={cn(
+            "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+            className
+        )}
+        {...props}
+    />
+))
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
+
+const TabsContent = React.forwardRef<
+    React.ElementRef<typeof TabsPrimitive.Content>,
+    React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+    <TabsPrimitive.Content
+        ref={ref}
+        className={cn(
+            "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            className
+        )}
+        {...props}
+    />
+))
+TabsContent.displayName = TabsPrimitive.Content.displayName
+
+export { Tabs, TabsList, TabsTrigger, TabsContent }
+
+------
+./src/components/ui/card.tsx
+import * as React from "react"
+import { cn } from "../../utils/cn"
+
+const Card = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+    <div
+        ref={ref}
+        className={cn(
+            "rounded-lg border bg-card text-card-foreground shadow-sm",
+            className
+        )}
+        {...props}
+    />
+))
+Card.displayName = "Card"
+
+const CardHeader = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+    <div
+        ref={ref}
+        className={cn("flex flex-col space-y-1.5 p-6", className)}
+        {...props}
+    />
+))
+CardHeader.displayName = "CardHeader"
+
+const CardTitle = React.forwardRef<
+    HTMLParagraphElement,
+    React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+    <h3
+        ref={ref}
+        className={cn(
+            "text-2xl font-semibold leading-none tracking-tight",
+            className
+        )}
+        {...props}
+    />
+))
+CardTitle.displayName = "CardTitle"
+
+const CardDescription = React.forwardRef<
+    HTMLParagraphElement,
+    React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+    <p
+        ref={ref}
+        className={cn("text-sm text-muted-foreground", className)}
+        {...props}
+    />
+))
+CardDescription.displayName = "CardDescription"
+
+const CardContent = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
+
+const CardFooter = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+    <div
+        ref={ref}
+        className={cn("flex items-center p-6 pt-0", className)}
+        {...props}
+    />
+))
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+
+------
+./src/components/ui/label.tsx
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
+import { cn } from "../../utils/cn"
+
+const Label = React.forwardRef<
+    React.ElementRef<typeof LabelPrimitive.Root>,
+    React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+>(({ className, ...props }, ref) => (
+    <LabelPrimitive.Root
+        ref={ref}
+        className={cn(
+            "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+            className
+        )}
+        {...props}
+    />
+))
+Label.displayName = LabelPrimitive.Root.displayName
+
+export { Label }
+
+------
 ./src/components/ui/alert.tsx
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -229,7 +417,205 @@ const AlertDescription = React.forwardRef<
 ))
 AlertDescription.displayName = "AlertDescription"
 
-export { Alert, AlertTitle, AlertDescription }------
+type AlertProps = React.ComponentPropsWithoutRef<typeof Alert>;
+
+
+export { Alert, AlertTitle, AlertDescription }
+export type { AlertProps }
+
+------
+./src/components/ui/table.tsx
+import * as React from "react"
+import { cn } from "../../utils/cn"
+
+const Table = React.forwardRef<
+    HTMLTableElement,
+    React.HTMLAttributes<HTMLTableElement>
+>(({ className, ...props }, ref) => (
+    <div className="w-full overflow-auto">
+        <table
+            ref={ref}
+            className={cn("w-full caption-bottom text-sm", className)}
+            {...props}
+        />
+    </div>
+))
+Table.displayName = "Table"
+
+const TableHeader = React.forwardRef<
+    HTMLTableSectionElement,
+    React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+    <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+))
+TableHeader.displayName = "TableHeader"
+
+const TableBody = React.forwardRef<
+    HTMLTableSectionElement,
+    React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+    <tbody
+        ref={ref}
+        className={cn("[&_tr:last-child]:border-0", className)}
+        {...props}
+    />
+))
+TableBody.displayName = "TableBody"
+
+const TableFooter = React.forwardRef<
+    HTMLTableSectionElement,
+    React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+    <tfoot
+        ref={ref}
+        className={cn("bg-primary font-medium text-primary-foreground", className)}
+        {...props}
+    />
+))
+TableFooter.displayName = "TableFooter"
+
+const TableRow = React.forwardRef<
+    HTMLTableRowElement,
+    React.HTMLAttributes<HTMLTableRowElement>
+>(({ className, ...props }, ref) => (
+    <tr
+        ref={ref}
+        className={cn(
+            "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+            className
+        )}
+        {...props}
+    />
+))
+TableRow.displayName = "TableRow"
+
+const TableHead = React.forwardRef<
+    HTMLTableCellElement,
+    React.ThHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+    <th
+        ref={ref}
+        className={cn(
+            "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+            className
+        )}
+        {...props}
+    />
+))
+TableHead.displayName = "TableHead"
+
+const TableCell = React.forwardRef<
+    HTMLTableCellElement,
+    React.TdHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+    <td
+        ref={ref}
+        className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
+        {...props}
+    />
+))
+TableCell.displayName = "TableCell"
+
+const TableCaption = React.forwardRef<
+    HTMLTableCaptionElement,
+    React.HTMLAttributes<HTMLTableCaptionElement>
+>(({ className, ...props }, ref) => (
+    <caption
+        ref={ref}
+        className={cn("mt-4 text-sm text-muted-foreground", className)}
+        {...props}
+    />
+))
+TableCaption.displayName = "TableCaption"
+
+export {
+    Table,
+    TableHeader,
+    TableBody,
+    TableFooter,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableCaption,
+}
+
+------
+./src/components/ui/index.ts
+export * from './button'
+export * from './card'
+export * from './input'
+export * from './label'
+export * from './tabs'
+export * from './table'
+export * from './alert'
+
+------
+./src/components/ui/button.tsx
+import * as React from "react"
+import { cn } from "../../utils/cn"
+
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+    size?: 'default' | 'sm' | 'lg'
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+    ({ className, variant = 'default', size = 'default', ...props }, ref) => {
+        return (
+            <button
+                className={cn(
+                    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+                    {
+                        'bg-primary text-primary-foreground hover:bg-primary/90': variant === 'default',
+                        'bg-destructive text-destructive-foreground hover:bg-destructive/90': variant === 'destructive',
+                        'border border-input hover:bg-accent hover:text-accent-foreground': variant === 'outline',
+                        'bg-secondary text-secondary-foreground hover:bg-secondary/80': variant === 'secondary',
+                        'hover:bg-accent hover:text-accent-foreground': variant === 'ghost',
+                        'underline-offset-4 hover:underline text-primary': variant === 'link',
+                        'h-10 py-2 px-4': size === 'default',
+                        'h-9 px-3': size === 'sm',
+                        'h-11 px-8': size === 'lg',
+                    },
+                    className
+                )}
+                ref={ref}
+                {...props}
+            />
+        )
+    }
+)
+Button.displayName = "Button"
+
+export { Button }
+
+------
+./src/components/ui/input.tsx
+import * as React from "react"
+import { cn } from "../../utils/cn"
+
+export interface InputProps
+    extends React.InputHTMLAttributes<HTMLInputElement> { }
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+    ({ className, type, ...props }, ref) => {
+        return (
+            <input
+                type={type}
+                className={cn(
+                    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                    className
+                )}
+                ref={ref}
+                {...props}
+            />
+        )
+    }
+)
+Input.displayName = "Input"
+
+export { Input }
+
+------
 ./src/components/layout/Navbar.tsx
 import { Home, FileSpreadsheet, Camera, Settings, TrendingUp } from 'lucide-react';
 
@@ -274,7 +660,8 @@ export const Navbar = () => {
             </div>
         </nav>
     );
-};------
+};
+------
 ./src/components/features/home/QuickActionCard.tsx
 import { Link } from 'react-router-dom';
 
@@ -305,7 +692,48 @@ export const QuickActionCard = ({ title, description, icon, href }: QuickActionC
             </Link>
         </div>
     </div>
-);------
+);
+------
+./src/components/FileUploader.tsx
+import React, { useCallback } from 'react'
+import { useDropzone, DropzoneOptions } from 'react-dropzone'
+import { Button } from '@/components/ui'
+
+interface FileUploaderProps {
+    onFileSelect: (file: File) => void
+}
+
+export const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        if (acceptedFiles && acceptedFiles.length > 0) {
+            onFileSelect(acceptedFiles[0])
+        }
+    }, [onFileSelect])
+
+    const dropzoneOptions: DropzoneOptions = {
+        onDrop,
+        multiple: false,
+        onDragEnter: () => { },
+        onDragLeave: () => { },
+        onDragOver: () => { }
+    }
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone(dropzoneOptions)
+
+    return (
+        <div {...getRootProps()} className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
+            <input {...getInputProps()} accept="text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            {isDragActive ? (
+                <p>Drop the file here ...</p>
+            ) : (
+                <p>Drag 'n' drop a file here, or click to select a file</p>
+            )}
+            <Button type="button" className="mt-4">Select File</Button>
+        </div>
+    )
+}
+
+------
 ./src/components/common/NavLink.tsx
 import { Link, useLocation } from 'react-router-dom';
 
@@ -329,9 +757,52 @@ export const NavLink = ({ children, to }: NavLinkProps) => {
             {children}
         </Link>
     );
-};------
+};
+------
+./src/components/routes/ProtectedRoute.tsx
+import { Navigate } from 'react-router-dom';
+import { isAuthenticated } from '../../hooks/useAuth';
+
+interface ProtectedRouteProps {
+    children: JSX.Element;
+}
+
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+    if (!isAuthenticated()) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
+};
+------
 ./src/vite-env.d.ts
 /// <reference types="vite/client" />
+------
+./src/hooks/useAuth.ts
+import { api } from "../services/api";
+
+
+export async function login(username: string, password: string) {
+    try {
+        const response = await api.post('/auth/login', { username, password });
+        const { access_token } = response.data;
+        localStorage.setItem('authToken', access_token); // Salvar o token
+        return access_token;
+    } catch (error) {
+        console.error('Erro ao autenticar:', error);
+        throw error;
+    }
+}
+
+export function logout() {
+    localStorage.removeItem('authToken');
+    window.location.href = '/login'; // Redireciona após logout
+}
+
+export function isAuthenticated(): boolean {
+    const token = localStorage.getItem('authToken');
+    return !!token;
+}
 ------
 ./src/hooks/useApi.ts
 
@@ -428,180 +899,210 @@ export const useDatasetAnalyses = (datasetId: string) => {
         queryFn: () => analysisApi.getByDataset(datasetId),
         enabled: !!datasetId
     });
-};------
-./src/pages/AnalysisPage.tsx
-// src/pages/AnalysisPage.tsx
-import React, { useState } from 'react';
-import { FileSpreadsheet } from 'lucide-react';
-import { useProjects, useUploadDataset, useAnalyzeDataset } from '../hooks/useApi';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+};
+------
+./src/pages/LoginPage.tsx
+import { useState } from 'react';
+import { login } from '../hooks/useAuth';
 
-export const AnalysisPage = () => {
-    const [file, setFile] = useState<File | null>(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const { data: projects } = useProjects();
-    const uploadDataset = useUploadDataset();
-    const analyzeDataset = useAnalyzeDataset();
+export const LoginPage = () => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
-    const handleDragOver = (e: React.DragEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-
-        const droppedFile = e.dataTransfer.files[0];
-        if (isValidFileType(droppedFile)) {
-            setFile(droppedFile);
-        }
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (selectedFile && isValidFileType(selectedFile)) {
-            setFile(selectedFile);
-        }
-    };
-
-    const handleUpload = async () => {
-        if (!file || !projects?.[0]) return;
-
         try {
-            // Upload the dataset
-            const dataset = await uploadDataset.mutateAsync({
-                projectId: projects[0].id,
-                name: file.name,
-                file: file
-            });
-
-            // Start analysis
-            await analyzeDataset.mutateAsync(dataset.id);
-
-            // Clear the file
-            setFile(null);
-        } catch (error) {
-            console.error('Upload failed:', error);
+            await login(username, password);
+            window.location.href = '/'; // Redireciona após login
+        } catch (err) {
+            setError('Falha ao fazer login. Verifique suas credenciais.');
         }
-    };
-
-    const isValidFileType = (file: File) => {
-        const validTypes = [
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        ];
-        return validTypes.includes(file.type);
     };
 
     return (
-        <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Analysis</h1>
-            <div className="bg-white shadow sm:rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                        Upload Dataset for Analysis
-                    </h3>
-                    <div className="mt-2 max-w-xl text-sm text-gray-500">
-                        <p>Upload your Excel file containing time series data for analysis.</p>
-                    </div>
-                    <div className="mt-5">
-                        <div
-                            className="flex items-center justify-center w-full"
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                        >
-                            <label className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer ${isDragging
-                                    ? 'border-blue-500 bg-blue-50'
-                                    : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
-                                }`}>
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <FileSpreadsheet className="w-10 h-10 mb-3 text-gray-400" />
-                                    <p className="mb-2 text-sm text-gray-500">
-                                        <span className="font-semibold">Click to upload</span> or drag and drop
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        Excel files only (XLSX, XLS)
-                                    </p>
-                                    {file && (
-                                        <p className="mt-2 text-sm text-blue-600">
-                                            Selected: {file.name}
-                                        </p>
-                                    )}
-                                </div>
-                                <input
-                                    type="file"
-                                    className="hidden"
-                                    accept=".xlsx,.xls"
-                                    onChange={handleFileChange}
-                                />
-                            </label>
-                        </div>
-                    </div>
-
-                    {file && (
-                        <div className="mt-4">
-                            <button
-                                onClick={handleUpload}
-                                disabled={uploadDataset.isPending || analyzeDataset.isPending}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                            >
-                                {uploadDataset.isPending || analyzeDataset.isPending ?
-                                    'Processing...' : 'Start Analysis'}
-                            </button>
-                        </div>
-                    )}
-
-                    {uploadDataset.error && (
-                        <Alert variant="destructive" className="mt-4">
-                            <AlertTitle>Upload Error</AlertTitle>
-                            <AlertDescription>
-                                {uploadDataset.error instanceof Error
-                                    ? uploadDataset.error.message
-                                    : 'Failed to upload dataset'}
-                            </AlertDescription>
-                        </Alert>
-                    )}
-
-                    {analyzeDataset.error && (
-                        <Alert variant="destructive" className="mt-4">
-                            <AlertTitle>Analysis Error</AlertTitle>
-                            <AlertDescription>
-                                {analyzeDataset.error instanceof Error
-                                    ? analyzeDataset.error.message
-                                    : 'Failed to analyze dataset'}
-                            </AlertDescription>
-                        </Alert>
-                    )}
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+            <form onSubmit={handleSubmit} className="p-8 bg-white shadow-md rounded-lg">
+                <h1 className="text-2xl font-bold mb-4">Login</h1>
+                {error && <p className="text-red-500">{error}</p>}
+                <div className="mb-4">
+                    <label className="block mb-2">Usuário</label>
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="w-full p-2 border rounded"
+                        required
+                    />
                 </div>
-            </div>
+                <div className="mb-4">
+                    <label className="block mb-2">Senha</label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full p-2 border rounded"
+                        required
+                    />
+                </div>
+                <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
+                    Entrar
+                </button>
+            </form>
         </div>
     );
-};------
-./src/pages/ProjectsPage.tsx
+};
+------
+./src/pages/AnalysisPage.tsx
+import { useState } from 'react';
+import { useAnalyzeDataset, useUploadDataset } from '../hooks/useApi';
+import { Alert, AlertDescription, AlertTitle, Button, Card, CardContent, CardHeader, CardTitle, Label, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
+import { FileUploader } from '../components/FileUploader';
 
-import { PlusCircle, FileSpreadsheet } from 'lucide-react';
+export const AnalysisPage = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [analysisType, setAnalysisType] = useState('mann-kendall');
+    const uploadDataset = useUploadDataset();
+    const analyzeDataset = useAnalyzeDataset();
+
+    const handleFileChange = (selectedFile: File) => {
+        setFile(selectedFile);
+    };
+
+    const handleUpload = async () => {
+        if (file) {
+            try {
+                const uploadResult = await uploadDataset.mutateAsync({
+                    projectId: 'your-project-id', // You need to provide the project ID
+                    name: file.name,
+                    file: file
+                });
+                if (uploadResult.id) {
+                    await analyzeDataset.mutateAsync(uploadResult.id);
+                }
+            } catch (error) {
+                console.error('Error during upload or analysis:', error);
+            }
+        }
+    };
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Data Analysis</h1>
+
+            <Tabs defaultValue="upload" className="space-y-4">
+                <TabsList>
+                    <TabsTrigger value="upload">Upload Dataset</TabsTrigger>
+                    <TabsTrigger value="results">Analysis Results</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="upload">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Upload New Dataset</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <FileUploader onFileSelect={handleFileChange} />
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="analysis-type">Analysis Type</Label>
+                                    <select
+                                        id="analysis-type"
+                                        value={analysisType}
+                                        onChange={(e) => setAnalysisType(e.target.value)}
+                                        className="w-full p-2 border rounded"
+                                    >
+                                        <option value="mann-kendall">Mann-Kendall Test</option>
+                                        <option value="linear-regression">Linear Regression</option>
+                                        <option value="time-series">Time Series Analysis</option>
+                                    </select>
+                                </div>
+
+                                <Button
+                                    onClick={handleUpload}
+                                    disabled={!file || uploadDataset.isPending || analyzeDataset.isPending}
+                                    className="w-full"
+                                >
+                                    {uploadDataset.isPending || analyzeDataset.isPending ? 'Processing...' : 'Start Analysis'}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="results">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Analysis Results</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {analyzeDataset.data ? (
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-2">Results for Dataset {analyzeDataset.data.dataset}</h3>
+                                    <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
+                                        {JSON.stringify(analyzeDataset.data.results, null, 2)}
+                                    </pre>
+                                </div>
+                            ) : (
+                                <p>No analysis results available. Please upload and analyze a dataset.</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+
+            {(uploadDataset.error || analyzeDataset.error) && (
+                <Alert variant="destructive" className="mt-4">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                        {uploadDataset.error instanceof Error
+                            ? uploadDataset.error.message
+                            : analyzeDataset.error instanceof Error
+                                ? analyzeDataset.error.message
+                                : 'An error occurred during the process'}
+                    </AlertDescription>
+                </Alert>
+            )}
+        </div>
+    );
+};
+
+------
+./src/pages/ProjectsPage.tsx
+import { useState } from 'react';
+import { PlusCircle, Search, Filter } from 'lucide-react';
 import { useProjects, useCreateProject } from '../hooks/useApi';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
 export const ProjectsPage = () => {
     const { data: projects, isLoading, error } = useProjects();
     const createProject = useCreateProject();
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handleNewProject = () => {
         createProject.mutate({
             name: "New Project",
-            description: "Description for new project"
+            description: "Description for new project",
+            processed: false
         });
     };
+
+    const filteredProjects = projects?.filter(project =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
     if (isLoading) {
         return (
@@ -623,45 +1124,64 @@ export const ProjectsPage = () => {
     }
 
     return (
-        <div>
+        <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-                <button
-                    onClick={handleNewProject}
-                    disabled={createProject.isPending}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                >
+                <Button onClick={handleNewProject} disabled={createProject.isPending}>
                     <PlusCircle className="h-5 w-5 mr-2" />
                     New Project
-                </button>
+                </Button>
             </div>
 
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                <ul className="divide-y divide-gray-200">
-                    {projects?.map((project) => (
-                        <li key={project.id}>
-                            <div className="px-4 py-4 sm:px-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <FileSpreadsheet className="h-5 w-5 text-gray-400 mr-3" />
-                                        <p className="text-sm font-medium text-blue-600 truncate">{project.name}</p>
-                                    </div>
-                                </div>
-                                <div className="mt-2 sm:flex sm:justify-between">
-                                    <div className="sm:flex">
-                                        <p className="flex items-center text-sm text-gray-500">
-                                            Last updated {new Date(project.updated_at).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                        Owner: {project.owner}
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            <Card className="mb-6">
+                <CardHeader>
+                    <CardTitle>Project List</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex space-x-2 mb-4">
+                        <div className="relative flex-grow">
+                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                            <Input
+                                type="text"
+                                placeholder="Search projects..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-8"
+                            />
+                        </div>
+                        <Button variant="outline">
+                            <Filter className="h-4 w-4 mr-2" />
+                            Filter
+                        </Button>
+                    </div>
+
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Created At</TableHead>
+                                <TableHead>Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredProjects?.map((project) => (
+                                <TableRow key={project.id}>
+                                    <TableCell className="font-medium">{project.name}</TableCell>
+                                    <TableCell>{project.description}</TableCell>
+                                    <TableCell>{new Date(project.created_at).toLocaleDateString()}</TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${project.processed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                            {project.processed ? 'Completed' : 'Pending'}
+                                        </span>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
 
             {createProject.error && (
                 <Alert variant="destructive" className="mt-4">
@@ -673,62 +1193,171 @@ export const ProjectsPage = () => {
             )}
         </div>
     );
-};------
-./src/pages/HomePage.tsx
-import { PlusCircle, FileSpreadsheet, TrendingUp } from 'lucide-react';
-import { QuickActionCard } from '../components/features/home/QuickActionCard';
+};
 
-export const HomePage = () => {
+------
+./src/pages/HomePage.tsx
+import { Plus, FileSpreadsheet, TrendingUp, BarChart2 } from 'lucide-react';
+import { Card } from '@/components/ui';
+
+interface ActionCardProps {
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    href: string;
+}
+
+const ActionCard = ({ title, description, icon, href }: ActionCardProps) => (
+    <a
+        href={href}
+        className="block p-6 transition-all duration-200 bg-gray-800 rounded-lg hover:bg-gray-700 group"
+    >
+        <div className="flex items-center space-x-4">
+            <div className="p-2 bg-gray-700 rounded-lg group-hover:bg-gray-600">
+                {icon}
+            </div>
+            <div>
+                <h3 className="text-lg font-semibold text-gray-100">{title}</h3>
+                <p className="text-gray-400">{description}</p>
+            </div>
+        </div>
+        <div className="mt-4">
+            <span className="inline-flex items-center text-sm font-medium text-blue-400 group-hover:text-blue-300">
+                Get started
+                <svg className="w-4 h-4 ml-2" viewBox="0 0 16 16" fill="none">
+                    <path d="M6.667 12.667L12 7.333L6.667 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </span>
+        </div>
+    </a>
+);
+
+interface RecentProjectProps {
+    name: string;
+    timeAgo: string;
+}
+
+const RecentProject = ({ name, timeAgo }: RecentProjectProps) => (
+    <div className="flex items-center justify-between py-3 border-b border-gray-700">
+        <span className="text-gray-300">{name}</span>
+        <span className="text-sm text-gray-500">{timeAgo}</span>
+    </div>
+);
+
+export default function HomePage() {
+    const actions = [
+        {
+            title: "Create New Project",
+            description: "Start a new analysis project",
+            icon: <Plus className="w-6 h-6 text-blue-400" />,
+            href: "/projects/new"
+        },
+        {
+            title: "Upload Dataset",
+            description: "Add new data for analysis",
+            icon: <FileSpreadsheet className="w-6 h-6 text-green-400" />,
+            href: "/analysis/new"
+        },
+        {
+            title: "View Results",
+            description: "Check your analysis results",
+            icon: <TrendingUp className="w-6 h-6 text-purple-400" />,
+            href: "/analysis"
+        },
+        {
+            title: "Visualize Data",
+            description: "Create charts and graphs",
+            icon: <BarChart2 className="w-6 h-6 text-orange-400" />,
+            href: "/visualize"
+        }
+    ];
+
     return (
-        <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                Welcome to Mann Kendall Automated
-            </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <QuickActionCard
-                    title="Create New Project"
-                    description="Start a new analysis project"
-                    icon={<PlusCircle className="h-6 w-6 text-blue-600" />}
-                    href="/projects/new"
-                />
-                <QuickActionCard
-                    title="Upload Dataset"
-                    description="Add new data for analysis"
-                    icon={<FileSpreadsheet className="h-6 w-6 text-blue-600" />}
-                    href="/analysis/new"
-                />
-                <QuickActionCard
-                    title="View Results"
-                    description="Check your analysis results"
-                    icon={<TrendingUp className="h-6 w-6 text-blue-600" />}
-                    href="/analysis"
-                />
+        <div className="min-h-screen bg-gray-900">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="space-y-12">
+                    {/* Header */}
+                    <div>
+                        <h1 className="text-4xl font-bold text-white">
+                            Welcome to Mann Kendall Automated
+                        </h1>
+                        <p className="mt-4 text-xl text-gray-400">
+                            Analyze your data with advanced statistical methods
+                        </p>
+                    </div>
+
+                    {/* Action Cards */}
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        {actions.map((action) => (
+                            <ActionCard key={action.title} {...action} />
+                        ))}
+                    </div>
+
+                    {/* Recent Projects */}
+                    <div className="bg-gray-800 rounded-lg p-6">
+                        <h2 className="text-xl font-semibold text-white mb-4">Recent Projects</h2>
+                        <div className="space-y-1">
+                            <RecentProject name="Project A" timeAgo="2 days ago" />
+                            <RecentProject name="Project B" timeAgo="1 week ago" />
+                            <RecentProject name="Project C" timeAgo="2 weeks ago" />
+                        </div>
+                        <a
+                            href="/projects"
+                            className="inline-flex items-center mt-4 text-sm font-medium text-blue-400 hover:text-blue-300"
+                        >
+                            View all projects
+                            <svg className="w-4 h-4 ml-2" viewBox="0 0 16 16" fill="none">
+                                <path d="M6.667 12.667L12 7.333L6.667 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     );
-};------
+}
+
+------
 ./src/services/api.ts
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
+const getAuthToken = () => localStorage.getItem('authToken') || '';
+
 
 // Create axios instance with default config
 export const api = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`, // Inclua o token aqui
     },
-    withCredentials: true, // Important for handling authentication cookies
+    withCredentials: true, // Para cookies de sessão, se necessário
 });
+
+
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (error.response?.status === 401) {
+            console.error('Autenticação falhou. Redirecionando para login.');
+            window.location.href = '/login'; // Redirecione para a página de login
+        }
+        return Promise.reject(error);
+    }
+);
+
 
 // Types
 export interface Project {
     id: string;
     name: string;
-    description: string | null;
+    description?: string;
     owner: string;
     created_at: string;
     updated_at: string;
+    processed: boolean;
 }
 
 export interface Dataset {
@@ -743,17 +1372,21 @@ export interface Dataset {
 export interface AnalysisResult {
     id: string;
     dataset: string;
-    well_name: string;
-    parameter: string;
-    trend: string;
-    statistic: number;
-    coefficient_variation: number;
-    confidence_factor: number;
-    data_points: number;
-    minimum_value: number;
-    maximum_value: number;
-    mean_value: number;
-    analysis_date: string;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    results: {
+        well_name: string;
+        parameter: string;
+        trend: string;
+        statistic: number;
+        coefficient_variation: number;
+        confidence_factor: number;
+        data_points: number;
+        minimum_value: number;
+        maximum_value: number;
+        mean_value: number;
+    }[];
+    created_at: string;
+    completed_at: string | null;
 }
 
 // API functions
@@ -786,22 +1419,15 @@ export const datasetsApi = {
             .then(res => res.data),
 
     // Upload new dataset
-    upload: (projectId: string, name: string, file: File) => {
-        const formData = new FormData();
-        formData.append('project', projectId);
-        formData.append('name', name);
-        formData.append('file', file);
-
-        return api.post<Dataset>('/datasets/', formData, {
+    upload: (data: { projectId: string; name: string; file: File }) =>
+        api.post<Dataset>('/datasets/', data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
-        }).then(res => res.data);
-    },
+        }).then(res => res.data),
 
-    // Start analysis for a dataset
     analyze: (datasetId: string) =>
-        api.post<{ message: string; results_count: number }>(`/datasets/${datasetId}/analyze/`)
+        api.post<AnalysisResult>(`/datasets/${datasetId}/analyze/`)
             .then(res => res.data)
 };
 
