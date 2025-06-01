@@ -3,11 +3,14 @@
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
+import pytest
 
 from mann_kendall.ui.visualizer import (
     choose_log_scale,
     create_trend_plot,
     filter_well_component,
+    get_desired_component,
+    display_results_table,
 )
 
 
@@ -28,6 +31,13 @@ def test_filter_well_component():
     assert "Well3" not in filtered_df["well"].values
     assert filtered_df["Component1"].dtype == float
     assert filtered_df["Component1"].tolist() == [5.0, 6.0]
+
+
+def test_get_desired_component():
+    results = pd.DataFrame({'Well': ['A', 'B'], 'Analise': ['X', 'Y']})
+    with patch('streamlit.selectbox', return_value='X'):
+        component = get_desired_component(results, ['A', 'B'])
+        assert component == 'X'
 
 
 @patch("streamlit.selectbox")
@@ -179,3 +189,19 @@ def test_create_trend_plot_linear_scale(
     
     # Verify title contains linear scale
     assert "linear scale" in kwargs["title"]
+
+
+def test_create_trend_plot():
+    results = pd.DataFrame({'Well': ['A', 'B'], 'Analise': ['X', 'Y']})
+    dataframe = pd.DataFrame({'well': ['A', 'B'], 'Date': ['2020-01-01', '2020-01-02'], 'X': [1, 2]})
+    with patch('streamlit.multiselect', return_value=['A', 'B']):
+        with patch('streamlit.selectbox', return_value='X'):
+            with patch('streamlit.plotly_chart'):
+                create_trend_plot(results, dataframe)
+
+
+def test_display_results_table():
+    results = pd.DataFrame({'Well': ['A', 'B'], 'Trend': ['Up', 'Down']})
+    with patch('streamlit.multiselect', return_value=['A']):
+        with patch('streamlit.dataframe'):
+            display_results_table(results)
