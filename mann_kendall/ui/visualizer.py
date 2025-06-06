@@ -106,9 +106,10 @@ def create_trend_plot(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
                 df_plot[log_component_name] = np.log10(df_plot[log_component_name])
                 
                 # Add a note about replacement to the chart title
-                title =(
-                    f"""{', '.join(desired_wells)} x {desired_component} 
-                    d(log scale with replaced values)""")
+                title = (
+                    f"{', '.join(desired_wells)} x {desired_component} "
+                    "(log scale with replaced values)"
+                )
                 plot_component = log_component_name
             else:
                 # No replacement needed, just log transform
