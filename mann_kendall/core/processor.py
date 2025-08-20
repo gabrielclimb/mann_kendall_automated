@@ -6,6 +6,10 @@ from mann_kendall.core.mann_kendall import mk_test
 from mann_kendall.data.cleaner import get_columns_with_incorrect_values, string_to_float
 from mann_kendall.utils.progress import print_progress_bar
 
+# Constants for statistical analysis
+MIN_SAMPLES_PER_COMPONENT = 4  # Minimum samples needed for Mann-Kendall test on a component
+MIN_WELLS_FOR_ANALYSIS = 5     # Minimum samples needed per well for inclusion in analysis
+
 
 def transpose_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -41,7 +45,7 @@ def process_well_data(well_name: str, df_transposto: pd.DataFrame, columns: list
 
     for column in columns:
         try:
-            if df_temp.loc[:, column].dropna().count() > 3:
+            if df_temp.loc[:, column].dropna().count() > MIN_SAMPLES_PER_COMPONENT:
                 values = df_temp.loc[:, column].apply(string_to_float).dropna().values
                 trend, s, cv, cf = mk_test(values)
                 array = [well_name, column, trend, s, cv, cf]
@@ -69,8 +73,8 @@ def generate_mann_kendall(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]
         print("You should fix these values first")
         raise TypeError("Input data contains string values that cannot be converted to float")
 
-    # Check the number of samples per well, if less than 5, it's ignored
-    wells = pd.DataFrame(df_transposto.well.value_counts() > 4).reset_index()
+    # Check the number of samples per well, if less than MIN_WELLS_FOR_ANALYSIS, it's ignored
+    wells = pd.DataFrame(df_transposto.well.value_counts() > (MIN_WELLS_FOR_ANALYSIS - 1)).reset_index()
     wells.columns = ["index", "well"]
     wells = wells[wells.well].iloc[:, 0]
 
