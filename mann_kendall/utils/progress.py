@@ -20,8 +20,19 @@ def print_progress_bar(
         length (int, optional): Character length of the progress bar. Defaults to 100.
         fill (str, optional): Bar fill character. Defaults to "█".
         printEnd (str, optional): End character (e.g., "\r", "\r\n"). Defaults to "\r".
+        
+    Raises:
+        ValueError: If total is zero or negative.
     """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    if total <= 0:
+        raise ValueError("Total must be greater than zero")
+    if iteration < 0:
+        raise ValueError("Iteration must be non-negative")
+    
+    # Clamp iteration to not exceed total
+    iteration = min(iteration, total)
+    
+    percent = f"{100 * (iteration / float(total)):.{decimals}f}"
     filledLength = int(length * iteration // total)
     progress_bar = fill * filledLength + "-" * (length - filledLength)
     print(f"\r{prefix} |{progress_bar}| {percent}%% {suffix}", end=printEnd)

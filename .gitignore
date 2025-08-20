@@ -1,8 +1,54 @@
+# Development and debugging files
 debug.py
-*__pycache__
-*.vscode
-*.DS_Store
-*.coverage
-*.pytest_cache
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Virtual environments
 venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing and coverage
+.coverage
+.pytest_cache/
 pytest-coverage.txt
+htmlcov/
+.tox/
+
+# Distribution and packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Temporary files
+*.tmp
+*.temp
