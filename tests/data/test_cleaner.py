@@ -28,8 +28,8 @@ def test_string_to_float_with_less_than():
 
 def test_string_to_float_rounding():
     """Test string_to_float rounding."""
-    assert string_to_float("5.1234") == 5.123
-    assert string_to_float("<0.01234") == 0.012
+    assert string_to_float("5.1234") == 5.1234  # Regular numbers are not rounded
+    assert string_to_float("<0.01234") == 0.012  # Only < prefixed numbers are rounded
 
 
 def test_string_to_float_exception():

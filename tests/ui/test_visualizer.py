@@ -58,7 +58,11 @@ def test_create_trend_plot_log_scale(
     mock_filter, mock_get_component, mock_multiselect):
     """Test create_trend_plot with log scale."""
     # Mock data
-    results = pd.DataFrame({"Well": ["Well1", "Well2"], "Analise": ["Component1", "Component1"]})
+    results = pd.DataFrame({
+        "Well": ["Well1", "Well2"], 
+        "Analise": ["Component1", "Component1"],
+        "Trend": ["increasing", "no trend"]
+    })
     dataframe = pd.DataFrame({
         "well": ["Well1", "Well2"],
         "Date": ["2020-01-01", "2020-01-02"],
@@ -105,7 +109,11 @@ def test_create_trend_plot_log_scale_with_zeros(mock_warning, mock_plotly_chart,
                                                mock_get_component, mock_multiselect):
     """Test create_trend_plot with log scale and zeros in data."""
     # Mock data
-    results = pd.DataFrame({"Well": ["Well1", "Well2"], "Analise": ["Component1", "Component1"]})
+    results = pd.DataFrame({
+        "Well": ["Well1", "Well2"], 
+        "Analise": ["Component1", "Component1"],
+        "Trend": ["increasing", "no trend"]
+    })
     dataframe = pd.DataFrame({
         "well": ["Well1", "Well2"],
         "Date": ["2020-01-01", "2020-01-02"],
@@ -149,7 +157,11 @@ def test_create_trend_plot_linear_scale(
     mock_filter, mock_get_component, mock_multiselect):
     """Test create_trend_plot with linear scale."""
     # Mock data
-    results = pd.DataFrame({"Well": ["Well1", "Well2"], "Analise": ["Component1", "Component1"]})
+    results = pd.DataFrame({
+        "Well": ["Well1", "Well2"], 
+        "Analise": ["Component1", "Component1"],
+        "Trend": ["increasing", "no trend"]
+    })
     dataframe = pd.DataFrame({
         "well": ["Well1", "Well2"],
         "Date": ["2020-01-01", "2020-01-02"],
