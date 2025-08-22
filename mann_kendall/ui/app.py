@@ -82,7 +82,7 @@ def main() -> None:
     st.title("📈 Mann Kendall Automated")
     st.markdown("""
     **Automated trend analysis using the Mann-Kendall statistical test**
-    
+
     Perfect for environmental engineering and geology applications. Upload your Excel file to detect trends in your time series data.
     """)
 
@@ -103,14 +103,14 @@ def main() -> None:
         with st.expander("📋 Required Format", expanded=False):
             st.markdown("""
             **Your Excel file should be structured like this:**
-            
+
             | | Well_1 | Well_1 | Well_1 |
             |---|--------|--------|--------|
             | | **2020-01-01** | **2020-02-01** | **2020-03-01** |
             | **Nitrate** | 15.2 | 16.1 | 17.3 |
             | **Chloride** | 45.2 | 44.8 | 43.9 |
             | **pH** | 7.2 | 7.1 | 7.3 |
-            
+
             **Important:**
             - **Row 1**: Well names (can repeat for multiple time periods)
             - **Row 2**: Dates for each measurement (yyyy-mm-dd format)
@@ -195,7 +195,7 @@ def main() -> None:
                     # Check for data quality issues
                     if get_columns_with_incorrect_values(dataframe):
                         st.warning("""
-                        ⚠️ **Data Quality Notice:** Some values in your data couldn't be converted to numbers. 
+                        ⚠️ **Data Quality Notice:** Some values in your data couldn't be converted to numbers.
                         These have been handled automatically, but you may want to review your source data for accuracy.
                         """)
 
@@ -259,10 +259,10 @@ def main() -> None:
         with col1:
             st.markdown("""
             ### 🎯 What is Mann-Kendall Analysis?
-            
-            The Mann-Kendall test is a **non-parametric statistical test** used to detect trends in time series data. 
+
+            The Mann-Kendall test is a **non-parametric statistical test** used to detect trends in time series data.
             It's particularly valuable because it:
-            
+
             - ✅ Doesn't assume normal distribution
             - ✅ Handles missing data well
             - ✅ Robust against outliers
@@ -272,9 +272,9 @@ def main() -> None:
         with col2:
             st.markdown("""
             ### 🔬 Perfect for:
-            
+
             - **Environmental Monitoring** - Groundwater quality trends
-            - **Geology** - Subsidence or uplift detection  
+            - **Geology** - Subsidence or uplift detection
             - **Climate Studies** - Temperature and precipitation trends
             - **Water Resources** - Flow and level monitoring
             - **Contamination Assessment** - Pollutant concentration changes
