@@ -2,12 +2,10 @@
 name = "mann-kendall-automated"
 version = "0.1.0"
 description = "Automated Mann-Kendall trend analysis for environmental engineering and geology"
-authors = [
-    {name = "Gabriel Barbosa Soares", email = "gabriel@example.com"},
-]
+authors = [{ name = "Gabriel Barbosa Soares", email = "gabriel@example.com" }]
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -58,8 +56,10 @@ allow-direct-references = true
 packages = ["mann_kendall"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py38"
+
+[tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 
 [tool.black]
