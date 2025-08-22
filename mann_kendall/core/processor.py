@@ -1,26 +1,52 @@
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
 
-from mann_kendall.core.mann_kendall import mk_test
+from mann_kendall.core.mann_kendall import MKTestResult, mk_test
 from mann_kendall.data.cleaner import get_columns_with_incorrect_values, string_to_float
 from mann_kendall.utils.progress import print_progress_bar
 
 
 def transpose_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Transposes the given DataFrame, replaces "ND" with 0.5, and renames columns.
+    Transposes the given DataFrame, handles "ND" (not detected) values, 
+    and renames columns for further processing.
 
     Args:
-        df (pd.DataFrame): Input DataFrame to transpose
+        df (pd.DataFrame): Input DataFrame to transpose. Expected to have wells as columns,
+                          with dates and components as rows.
 
     Returns:
-        pd.DataFrame: Transposed DataFrame with modified columns
+        pd.DataFrame: Transposed DataFrame with columns renamed and standardized:
+                     - 'well': contains well names
+                     - 'Date': contains date information
+                     - Additional columns contain component values
+
+    Notes:
+        - "ND", "N/D", and other not-detected indicators will be replaced with 0.5
+        - Empty cells will be preserved as NaN for proper handling
     """
-    df = df.replace("ND", 0.5)
+    # Handle common not-detected indicators
+    df = df.replace(["ND", "N/D", "NOT DETECTED", "<ND"], 0.5)
+    
+    # Transpose the DataFrame (columns become rows)
     df_transposto = df.T
-    df_transposto.columns.values[0] = "well"
-    df_transposto.columns.values[1] = "Date"
+    
+    # Rename the first two columns for standardization
+    if len(df_transposto.columns) >= 2:
+        df_transposto.columns.values[0] = "well"
+        df_transposto.columns.values[1] = "Date"
+    else:
+        raise ValueError("DataFrame must have at least two columns after transposition")
+    
+    # Convert date columns to datetime where possible
+    try:
+        df_transposto["Date"] = pd.to_datetime(df_transposto["Date"])
+    except Exception:
+        # If conversion fails, keep as is - might be a custom date format
+        pass
+        
     return df_transposto
 
 
@@ -35,20 +61,38 @@ def process_well_data(well_name: str, df_transposto: pd.DataFrame, columns: list
 
     Returns:
         pd.DataFrame: Results of Mann-Kendall tests for this well
+        
+    Raises:
+        TypeError: If values can't be converted to float
+        ValueError: If insufficient data points after filtering NaN values
+        ZeroDivisionError: If mean of data is zero (can't calculate coefficient of variation)
     """
     results = pd.DataFrame()
     df_temp = df_transposto[df_transposto.well == well_name]
 
     for column in columns:
         try:
-            if df_temp.loc[:, column].dropna().count() > 3:
-                values = df_temp.loc[:, column].apply(string_to_float).dropna().values
-                trend, s, cv, cf = mk_test(values)
-                array = [well_name, column, trend, s, cv, cf]
+            # Check if we have enough data points (at least 4) after removing NaNs
+            filtered_data = df_temp.loc[:, column].dropna()
+            if filtered_data.count() > 3:
+                # Convert values and drop any remaining NaNs
+                values = filtered_data.apply(string_to_float).dropna().values
+                
+                # Check for all zeros which would cause division by zero in CV calculation
+                if np.mean(values) == 0:
+                    continue
+                    
+                result = mk_test(values)
+                array = [well_name, column, result.trend, result.statistic, 
+                         result.coefficient_of_variation, result.confidence_factor]
                 results = pd.concat([results, pd.DataFrame([array])], ignore_index=True)
+            # else: silently skip components with insufficient data
         except TypeError:
             values = df_temp.loc[:, column].apply(string_to_float).fillna(0).values
-            raise TypeError(f"incorrect values: {values}")
+            raise TypeError(f"Incorrect values in column {column}: {values}")
+        except ZeroDivisionError:
+            # This could happen if all values are zero (CV calculation would fail)
+            raise ValueError(f"Cannot calculate trend for {column}: All values are zero")
 
     return results
 

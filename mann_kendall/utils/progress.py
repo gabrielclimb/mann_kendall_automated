@@ -1,3 +1,7 @@
+import streamlit as st
+from typing import Optional
+
+
 def print_progress_bar(
     iteration: int,
     total: int,
@@ -28,3 +32,32 @@ def print_progress_bar(
     # Print New Line on Complete
     if iteration == total:
         print()
+
+
+class StreamlitProgressTracker:
+    """Enhanced progress tracking for Streamlit applications."""
+    
+    def __init__(self, total_steps: int, title: str = "Processing"):
+        self.total_steps = total_steps
+        self.current_step = 0
+        self.title = title
+        self.progress_bar = st.progress(0)
+        self.status_text = st.empty()
+        
+    def update(self, step_name: str, increment: int = 1):
+        """Update progress with step name."""
+        self.current_step += increment
+        progress = min(self.current_step / self.total_steps, 1.0)
+        
+        self.progress_bar.progress(progress)
+        self.status_text.text(f"{self.title}: {step_name} ({self.current_step}/{self.total_steps})")
+        
+    def complete(self, final_message: str = "Complete!"):
+        """Mark progress as complete."""
+        self.progress_bar.progress(1.0)
+        self.status_text.text(final_message)
+        
+    def cleanup(self):
+        """Remove progress indicators."""
+        self.progress_bar.empty()
+        self.status_text.empty()
