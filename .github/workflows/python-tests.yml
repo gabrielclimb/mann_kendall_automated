@@ -15,32 +15,32 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-        
+
     - name: Install Rye
       run: |
         curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
         echo "$HOME/.rye/shims" >> $GITHUB_PATH
-        
+
     - name: Install dependencies with Rye
       run: |
         rye sync
         . .venv/bin/activate
-        
+
     - name: Lint with ruff
       run: |
         . .venv/bin/activate
         ruff check mann_kendall tests scripts
-        
+
     - name: Test with pytest
       run: |
         . .venv/bin/activate
         pytest --cov=mann_kendall tests/
-        
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
