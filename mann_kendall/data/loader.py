@@ -62,21 +62,17 @@ def validate_input_format(df: pd.DataFrame) -> bool:
         ValueError: If DataFrame does not have the expected format
         pd.errors.EmptyDataError: If DataFrame is empty
     """
-    # Check if DataFrame is empty
     if df.empty:
         raise pd.errors.EmptyDataError("Input DataFrame is empty")
 
-    # Check that DataFrame has minimum dimensions required
     if df.shape[1] < 2:
         raise ValueError("Input file must have at least two columns (date and one well)")
 
     if len(df.index) < 2:
         raise ValueError("Input file must have at least two rows (date and component)")
 
-    # Check that first column (index) contains date-like values
     has_date_format = False
 
-    # Try to convert first few index entries to datetime to validate date format
     try:
         if isinstance(df.index[0], str):
             pd.to_datetime(df.index[: min(5, len(df.index))])
@@ -91,20 +87,14 @@ def validate_input_format(df: pd.DataFrame) -> bool:
     ):
         raise ValueError("First column must contain valid dates or date-like strings")
 
-    # Check for NaN in the first row (well names)
     if df.columns.isna().any():
         raise ValueError("Well names (column headers) cannot be empty")
 
-    # Check for duplicate well names
     if len(df.columns) != len(set(df.columns)):
         raise ValueError("Duplicate well names found. Each well must have a unique name.")
 
-    # Check that second row has values (component names)
     if df.iloc[0].isna().all():
         raise ValueError("Component names (second row) cannot be all empty")
-
-    # Note: Mann-Kendall test works best with at least 4 data points
-    # But we'll allow users to proceed with fewer points and show a warning
 
     return True
 

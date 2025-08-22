@@ -380,7 +380,7 @@ def create_summary_statistics(results: pd.DataFrame) -> pd.DataFrame:
     # Statistical ranges
     summary_data.append({
         'Metric': 'Mann-Kendall Statistic Range',
-        'Value': f'{results["Mann-Kendall Statistic (S)"].min():.2f} to {results["Mann-Kendall Statistic (S)"].max():.2f}',
+        'Value': f'{results["Mann-Kendall Statistic (S)"].min():.2f} to {results["Mann-Kendall Statistic (S)"].max():.2f}', # noqa: E501
         'Description': 'Range of Mann-Kendall S statistics'
     })
 
