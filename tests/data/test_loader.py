@@ -32,11 +32,11 @@ def test_load_excel_invalid_file():
 
 def test_validate_input_format_valid():
     """Test validating a correctly formatted input DataFrame."""
-    # Create a valid DataFrame
+    # Create a valid DataFrame with datetime index
     df = pd.DataFrame({
         "Well1": [1.0, 2.0],
         "Well2": [3.0, 4.0]
-    }, index=["2020-01-01", "Component"])
+    }, index=[pd.Timestamp("2020-01-01"), "Component"])
     
     # Should not raise an exception
     assert validate_input_format(df)
