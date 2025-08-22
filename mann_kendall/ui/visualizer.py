@@ -369,7 +369,7 @@ def display_results_table(results: pd.DataFrame) -> None:
                 return 'background-color: #d1ecf1; color: #0c5460'
 
         # Display the styled results
-        styled_df = filtered_results.style.applymap(
+        styled_df = filtered_results.style.map(
             style_trends,
             subset=['Trend']
         ).format({
