@@ -89,7 +89,7 @@ def validate_input_format(df: pd.DataFrame) -> bool:
 
     return True
 
-
+# noqa: E501
 def check_data_sufficiency(df: pd.DataFrame) -> tuple[bool, str]:
     """
     Check if the data has sufficient points for reliable Mann-Kendall analysis.
@@ -103,7 +103,8 @@ def check_data_sufficiency(df: pd.DataFrame) -> tuple[bool, str]:
     if len(df.index) < 4:
         return (
             False,
-            f"Your data has only {len(df.index)} time points. Mann-Kendall test works best with at least 4 data points for reliable results.",
+            f"""Your data has only {len(df.index)} time points. 
+            Mann-Kendall test works best with at least 4 data points.""",
         )
     elif len(df.index) < 6:
         return (
