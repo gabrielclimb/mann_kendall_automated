@@ -149,32 +149,32 @@ def create_trend_plot(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
                 df_plot.loc[df_plot[log_component_name] <= 0, log_component_name] = replacement_value
                 df_plot[log_component_name] = np.log10(df_plot[log_component_name])
 
-                title = f"{desired_component} Trends (Log Scale - Adjusted Values)"
+                title = f"{desired_component} Trends (log scale - replaced values)"
                 plot_component = log_component_name
-                y_title = f"Log₁₀({desired_component})"
+                y_title = desired_component
             else:
                 df_plot[log_component_name] = np.log10(df_plot[desired_component])
-                title = f"{desired_component} Trends (Log Scale)"
+                title = f"{desired_component} Trends (log scale)"
                 plot_component = log_component_name
-                y_title = f"Log₁₀({desired_component})"
+                y_title = desired_component
         else:
-            title = f"{desired_component} Trends (Linear Scale)"
+            title = f"{desired_component} Trends (linear scale)"
             plot_component = desired_component
             y_title = desired_component
 
         # Create the plot with enhanced styling
         if smooth_lines:
-            fig = px.line(df_plot, x="Date", y=plot_component, color="well", title=title, line_shape="spline")
+            fig = px.line(df_plot, x="Date", y=plot_component, color="well", title=title, line_shape="spline", log_y=False)
         else:
-            fig = px.line(df_plot, x="Date", y=plot_component, color="well", title=title)
+            fig = px.line(df_plot, x="Date", y=plot_component, color="well", title=title, log_y=False)
 
         # Add scatter points if requested
         if show_points:
             fig.update_traces(mode="lines+markers", marker=dict(size=4))
 
         # Enhanced styling
+        fig.update_layout(yaxis_title=y_title)
         fig.update_layout(
-            yaxis_title=y_title,
             xaxis_title="Date",
             hovermode="x unified",
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
