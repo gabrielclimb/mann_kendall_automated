@@ -8,6 +8,7 @@ from mann_kendall.core.sens_slope import sens_slope
 
 CONFIDENCE_THRESHOLD_LOW = 0.9
 CONFIDENCE_THRESHOLD_HIGH = 0.95
+ZERO_THRESHOLD = 1e-10
 
 class TrendType(str, Enum):
     """Enum representing different types of trends detected by Mann-Kendall test."""
@@ -95,7 +96,8 @@ def _seasonal_mk_test(x: np.ndarray, alpha: float = 0.05, period: int = 12) -> M
     p = 1 - norm.cdf(abs(z))
 
     # Coefficient of variation remains the same as non-seasonal
-    cv = np.std(x, ddof=1) / np.mean(x) if abs(np.mean(x)) > 1e-10 else np.inf
+    
+    cv = np.std(x, ddof=1) / np.mean(x) if abs(np.mean(x)) > ZERO_THRESHOLD else np.inf
 
     # Confidence factor
     cf = 1 - p
@@ -104,7 +106,7 @@ def _seasonal_mk_test(x: np.ndarray, alpha: float = 0.05, period: int = 12) -> M
     if cf < CONFIDENCE_THRESHOLD_LOW:
         trend = "seasonal no trend"  # Consolidate seasonal stable and no trend
     else:
-        
+
         if cf <= CONFIDENCE_THRESHOLD_HIGH:
             if total_s > 0:
                 trend = "seasonal probably increasing"
@@ -265,7 +267,7 @@ def mk_test(
     # Using ddof=1 for sample standard deviation
     # Handle the case where mean is very close to zero to avoid division errors
     mean_value = np.mean(x)
-    if abs(mean_value) < 1e-10:  # Threshold for "practically zero"
+    if abs(mean_value) < ZERO_THRESHOLD:  # Threshold for "practically zero"
         cv = np.inf if np.std(x, ddof=1) > 0 else 0.0
     else:
         cv = np.std(x, ddof=1) / mean_value
