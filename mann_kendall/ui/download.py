@@ -3,7 +3,6 @@ import json
 from datetime import datetime
 from io import BytesIO, StringIO
 from random import randint
-from typing import Dict, Any
 
 import pandas as pd
 import streamlit as st
@@ -99,7 +98,7 @@ def save_to_excel(dataframe: pd.DataFrame, filename: str, output_dir: str = "out
         raise PermissionError(f"Cannot write to file {output_filename}. Check permissions.")
     except Exception as e:
         raise OSError(f"Error saving file: {str(e)}")
-    return output_filename
+
 
 def create_enhanced_download_section(results: pd.DataFrame, processed_data: pd.DataFrame = None) -> None:
     """
@@ -324,7 +323,7 @@ def create_summary_report(results: pd.DataFrame) -> str:
             report.write(f"  - {row['Analise']}: {row['Trend']} (S={row['Mann-Kendall Statistic (S)']:.2f})\n")
 
     # Component analysis
-    report.write(f"\n\nCOMPONENT ANALYSIS\n")
+    report.write("\n\nCOMPONENT ANALYSIS\n")
     report.write("-" * 20 + "\n")
 
     for component in sorted(results['Analise'].unique()):

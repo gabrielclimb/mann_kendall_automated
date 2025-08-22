@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 
-from mann_kendall.core.mann_kendall import MKTestResult, mk_test
+from mann_kendall.core.mann_kendall import mk_test
 from mann_kendall.data.cleaner import get_columns_with_incorrect_values, string_to_float
 from mann_kendall.utils.progress import print_progress_bar
 

@@ -2,14 +2,15 @@
 # ruff: noqa: E501
 __author__ = "Gabriel Barbosa Soares"
 
+from typing import Tuple
+
 import pandas as pd
 import streamlit as st
-from typing import Optional, Tuple
 
 from mann_kendall.core.processor import generate_mann_kendall
 from mann_kendall.data.cleaner import get_columns_with_incorrect_values
-from mann_kendall.data.loader import load_excel_data, check_data_sufficiency
-from mann_kendall.ui.download import get_table_download_link, create_enhanced_download_section
+from mann_kendall.data.loader import check_data_sufficiency, load_excel_data
+from mann_kendall.ui.download import create_enhanced_download_section
 from mann_kendall.ui.visualizer import create_trend_plot, display_results_table
 
 

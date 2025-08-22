@@ -1,5 +1,5 @@
+
 import streamlit as st
-from typing import Optional
 
 
 def print_progress_bar(

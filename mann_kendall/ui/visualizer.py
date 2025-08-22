@@ -386,7 +386,7 @@ def display_results_table(results: pd.DataFrame) -> None:
             st.download_button(
                 label="Download as CSV",
                 data=csv,
-                file_name=f"mann_kendall_filtered_results.csv",
+                file_name="mann_kendall_filtered_results.csv",
                 mime="text/csv"
             )
 
