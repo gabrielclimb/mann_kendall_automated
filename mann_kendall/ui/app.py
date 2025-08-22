@@ -42,28 +42,7 @@ def validate_file_format(df: pd.DataFrame) -> Tuple[bool, str]:
     return True, ""
 
 
-def display_data_preview(df: pd.DataFrame) -> None:
-    """Display a preview of the uploaded data with basic statistics."""
-    st.subheader("📊 Data Preview")
 
-    col1, col2 = st.columns([2, 1])
-
-    with col1:
-        st.write("**First 10 rows of your data:**")
-        st.dataframe(df.head(10), use_container_width=True)
-
-    with col2:
-        st.write("**Data Summary:**")
-        st.metric("Total Rows", df.shape[0])
-        st.metric("Total Columns", df.shape[1])
-        st.metric("Data Points", f"{(df.shape[0] - 1) * (df.shape[1] - 1):,}")
-
-        # Check for missing values
-        missing_count = df.isnull().sum().sum()
-        if missing_count > 0:
-            st.warning(f"⚠️ {missing_count} missing values detected")
-        else:
-            st.success("✅ No missing values")
 
 
 def main() -> None:
@@ -147,8 +126,7 @@ def main() -> None:
                 st.info("💡 Please check the format requirements in the sidebar and try again.")
                 return
 
-            # Step 3: Show data preview
-            display_data_preview(df)
+
 
             # Step 3.5: Check data sufficiency and show warnings
             is_sufficient, warning_msg = check_data_sufficiency(df)

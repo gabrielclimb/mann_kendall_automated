@@ -2,7 +2,7 @@ from typing import BinaryIO, Union
 
 import pandas as pd
 
-
+# noqa: E501
 def load_excel_data(file_content: Union[str, bytes, BinaryIO]) -> pd.DataFrame:
     """
     Loads data from an Excel file into a pandas DataFrame and validates its format.

@@ -56,7 +56,7 @@ allow-direct-references = true
 packages = ["mann_kendall"]
 
 [tool.ruff]
-line-length = 120
+line-length = 130
 target-version = "py38"
 
 [tool.ruff.lint]
