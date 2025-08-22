@@ -1,6 +1,8 @@
+from io import BytesIO
 from typing import BinaryIO, Union
 
 import pandas as pd
+
 
 # noqa: E501
 def load_excel_data(file_content: Union[str, bytes, BinaryIO]) -> pd.DataFrame:
@@ -22,26 +24,19 @@ def load_excel_data(file_content: Union[str, bytes, BinaryIO]) -> pd.DataFrame:
         FileNotFoundError: If the file doesn't exist (when path is provided)
     """
     try:
-        # Try to load the Excel file
-        df = pd.read_excel(file_content, header=None, index_col=0)
+        if isinstance(file_content, bytes):
+            file_content = BytesIO(file_content)
 
-        # Validate the format of the loaded data
+        df = pd.read_excel(file_content, header=None, index_col=0, engine="openpyxl")
         validate_input_format(df)
-
         return df
     except pd.errors.EmptyDataError:
-        raise pd.errors.EmptyDataError(
-            "The uploaded file is empty. Please provide a file with data."
-        )
+        raise pd.errors.EmptyDataError("The uploaded file is empty. Please provide a file with data.")
     except pd.errors.ParserError:
-        raise pd.errors.ParserError(
-            "Unable to parse the file. Please ensure it's a valid Excel file."
-        )
+        raise pd.errors.ParserError("Unable to parse the file. Please ensure it's a valid Excel file.")
     except ValueError as e:
-        # Re-raise validation errors
         raise ValueError(f"Invalid file format: {str(e)}")
     except Exception as e:
-        # Re-raise with more context for other errors
         raise type(e)(f"Error loading Excel file: {str(e)}")
 
 
@@ -80,11 +75,7 @@ def validate_input_format(df: pd.DataFrame) -> bool:
     except (ValueError, TypeError):
         pass
 
-    if (
-        not has_date_format
-        and not isinstance(df.index[0], pd.Timestamp)
-        and not pd.isna(df.index[0])
-    ):
+    if not has_date_format and not isinstance(df.index[0], pd.Timestamp) and not pd.isna(df.index[0]):
         raise ValueError("First column must contain valid dates or date-like strings")
 
     if df.columns.isna().any():

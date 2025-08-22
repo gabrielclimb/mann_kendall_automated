@@ -6,9 +6,7 @@ import plotly.express as px
 import streamlit as st
 
 
-def filter_well_component(
-    df_transposed: pd.DataFrame, desired_wells: list, desired_component: str
-) -> pd.DataFrame:
+def filter_well_component(df_transposed: pd.DataFrame, desired_wells: list, desired_component: str) -> pd.DataFrame:
     """
     Filters the DataFrame to include only the desired wells and component.
 
@@ -39,9 +37,7 @@ def get_desired_component(results: pd.DataFrame, desired_wells: List[str]) -> st
         str: Desired component selected by the user.
     """
     results_filter_by_well = results[results.Well.isin(desired_wells)]
-    desired_component = st.selectbox(
-        "Select Component", results_filter_by_well.Analise.unique()
-    )
+    desired_component = st.selectbox("Select Component", results_filter_by_well.Analise.unique())
     return desired_component
 
 
@@ -73,32 +69,24 @@ def create_trend_plot(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
         # Add quick selection options
         all_wells = results.Well.unique()
 
-        selection_type = st.radio(
-            "Selection Method:",
-            ["Manual Selection", "Wells with Trends", "All Wells"],
-            horizontal=True
-        )
+        selection_type = st.radio("Selection Method:", ["Manual Selection", "Wells with Trends", "All Wells"], horizontal=True)
 
         if selection_type == "Manual Selection":
-            desired_wells = st.multiselect(
-                "Select Wells to Plot",
-                all_wells,
-                help="Choose specific wells to visualize"
-            )
+            desired_wells = st.multiselect("Select Wells to Plot", all_wells, help="Choose specific wells to visualize")
         elif selection_type == "Wells with Trends":
-            trending_wells = results[results.Trend != 'no trend'].Well.unique()
+            trending_wells = results[results.Trend != "no trend"].Well.unique()
             desired_wells = st.multiselect(
                 "Wells with Significant Trends",
                 trending_wells,
                 default=trending_wells[:5] if len(trending_wells) > 0 else [],
-                help="Pre-filtered to wells with detected trends"
+                help="Pre-filtered to wells with detected trends",
             )
         else:  # All Wells
             desired_wells = st.multiselect(
                 "All Wells",
                 all_wells,
                 default=all_wells[:3] if len(all_wells) > 0 else [],
-                help="All available wells (limited to first 3 by default for performance)"
+                help="All available wells (limited to first 3 by default for performance)",
             )
 
     with col2:
@@ -109,9 +97,9 @@ def create_trend_plot(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
             trend_summary = selected_results.Trend.value_counts()
 
             for trend, count in trend_summary.items():
-                if 'increasing' in trend:
+                if "increasing" in trend:
                     st.success(f"📈 {count} {trend}")
-                elif 'decreasing' in trend:
+                elif "decreasing" in trend:
                     st.error(f"📉 {count} {trend}")
                 else:
                     st.info(f"➡️ {count} {trend}")
@@ -176,77 +164,56 @@ def create_trend_plot(results: pd.DataFrame, dataframe: pd.DataFrame) -> None:
 
         # Create the plot with enhanced styling
         if smooth_lines:
-            fig = px.line(
-                df_plot,
-                x="Date",
-                y=plot_component,
-                color="well",
-                title=title,
-                line_shape="spline"
-            )
+            fig = px.line(df_plot, x="Date", y=plot_component, color="well", title=title, line_shape="spline")
         else:
-            fig = px.line(
-                df_plot,
-                x="Date",
-                y=plot_component,
-                color="well",
-                title=title
-            )
+            fig = px.line(df_plot, x="Date", y=plot_component, color="well", title=title)
 
         # Add scatter points if requested
         if show_points:
-            fig.update_traces(mode='lines+markers', marker=dict(size=4))
+            fig.update_traces(mode="lines+markers", marker=dict(size=4))
 
         # Enhanced styling
         fig.update_layout(
             yaxis_title=y_title,
             xaxis_title="Date",
-            hovermode='x unified',
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
-            ),
-            height=500
+            hovermode="x unified",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            height=500,
         )
 
         # Add trend annotations for each well
         for well in desired_wells:
-            well_trend_data = results[
-                (results.Well == well) & (results.Analise == desired_component)
-            ]
+            well_trend_data = results[(results.Well == well) & (results.Analise == desired_component)]
             if not well_trend_data.empty:
-                trend = well_trend_data.iloc[0]['Trend']
-                if trend != 'no trend':
+                trend = well_trend_data.iloc[0]["Trend"]
+                if trend != "no trend":
                     # Add subtle trend indicator
-                    if 'increasing' in trend:
+                    if "increasing" in trend:
                         trend_symbol = "📈"
-                    elif 'decreasing' in trend:
+                    elif "decreasing" in trend:
                         trend_symbol = "📉"
                     else:
                         trend_symbol = "➡️"
 
                     fig.add_annotation(
                         text=f"{well}: {trend_symbol}",
-                        xref="paper", yref="paper",
-                        x=0.02, y=0.98 - (list(desired_wells).index(well) * 0.05),
+                        xref="paper",
+                        yref="paper",
+                        x=0.02,
+                        y=0.98 - (list(desired_wells).index(well) * 0.05),
                         showarrow=False,
                         font=dict(size=10),
                         bgcolor="rgba(255,255,255,0.8)",
                         bordercolor="gray",
-                        borderwidth=1
+                        borderwidth=1,
                     )
 
         st.plotly_chart(fig, use_container_width=True)
 
         # Show data statistics
         with st.expander("📊 Data Statistics for Selected Wells"):
-            stats_df = df_filtered.groupby('well')[desired_component].agg([
-                'count', 'mean', 'std', 'min', 'max'
-            ]).round(3)
-            stats_df.columns = ['Data Points', 'Mean', 'Std Dev', 'Min', 'Max']
+            stats_df = df_filtered.groupby("well")[desired_component].agg(["count", "mean", "std", "min", "max"]).round(3)
+            stats_df.columns = ["Data Points", "Mean", "Std Dev", "Min", "Max"]
             st.dataframe(stats_df, use_container_width=True)
 
     else:
@@ -267,26 +234,17 @@ def display_results_table(results: pd.DataFrame) -> None:
 
     with col1:
         well_filter = st.multiselect(
-            "🏭 Filter by Wells",
-            options=sorted(results.Well.unique()),
-            default=[],
-            help="Select specific wells to view"
+            "🏭 Filter by Wells", options=sorted(results.Well.unique()), default=[], help="Select specific wells to view"
         )
 
     with col2:
         trend_filter = st.multiselect(
-            "📈 Filter by Trend",
-            options=results.Trend.unique(),
-            default=[],
-            help="Filter by trend type"
+            "📈 Filter by Trend", options=results.Trend.unique(), default=[], help="Filter by trend type"
         )
 
     with col3:
         component_filter = st.multiselect(
-            "🧪 Filter by Component",
-            options=sorted(results.Analise.unique()),
-            default=[],
-            help="Select specific components"
+            "🧪 Filter by Component", options=sorted(results.Analise.unique()), default=[], help="Select specific components"
         )
 
     # Additional filtering options
@@ -294,8 +252,8 @@ def display_results_table(results: pd.DataFrame) -> None:
 
     with col1:
         # Confidence factor threshold
-        min_conf = float(results['Confidence Factor'].min())
-        max_conf = float(results['Confidence Factor'].max())
+        min_conf = float(results["Confidence Factor"].min())
+        max_conf = float(results["Confidence Factor"].max())
 
         # Only show slider if there's a range of values
         if max_conf > min_conf:
@@ -305,7 +263,7 @@ def display_results_table(results: pd.DataFrame) -> None:
                 max_value=max_conf,
                 value=min_conf,
                 step=0.1,
-                help="Filter results by minimum confidence level"
+                help="Filter results by minimum confidence level",
             )
         else:
             # If all values are the same, just show the value and use it as filter
@@ -314,10 +272,7 @@ def display_results_table(results: pd.DataFrame) -> None:
 
     with col2:
         # Show only significant trends option
-        only_significant = st.checkbox(
-            "Show Only Significant Trends",
-            help="Hide results with 'no trend'"
-        )
+        only_significant = st.checkbox("Show Only Significant Trends", help="Hide results with 'no trend'")
 
     # Apply filters
     filtered_results = results.copy()
@@ -329,11 +284,9 @@ def display_results_table(results: pd.DataFrame) -> None:
     if component_filter:
         filtered_results = filtered_results[filtered_results.Analise.isin(component_filter)]
     if only_significant:
-        filtered_results = filtered_results[filtered_results.Trend != 'no trend']
+        filtered_results = filtered_results[filtered_results.Trend != "no trend"]
 
-    filtered_results = filtered_results[
-        filtered_results['Confidence Factor'] >= min_confidence
-    ]
+    filtered_results = filtered_results[filtered_results["Confidence Factor"] >= min_confidence]
 
     # Display summary of filtered results
     if len(filtered_results) != len(results):
@@ -344,9 +297,7 @@ def display_results_table(results: pd.DataFrame) -> None:
 
     with col1:
         sort_column = st.selectbox(
-            "Sort by:",
-            options=['Well', 'Analise', 'Trend', 'Mann-Kendall Statistic (S)', 'Confidence Factor'],
-            index=0
+            "Sort by:", options=["Well", "Analise", "Trend", "Mann-Kendall Statistic (S)", "Confidence Factor"], index=0
         )
 
     with col2:
@@ -354,41 +305,28 @@ def display_results_table(results: pd.DataFrame) -> None:
 
     # Apply sorting
     if not filtered_results.empty:
-        filtered_results = filtered_results.sort_values(
-            by=sort_column,
-            ascending=sort_ascending
-        ).reset_index(drop=True)
+        filtered_results = filtered_results.sort_values(by=sort_column, ascending=sort_ascending).reset_index(drop=True)
 
         # Style the dataframe for better readability
         def style_trends(val):
-            if 'increasing' in val:
-                return 'background-color: #d4edda; color: #155724'
-            elif 'decreasing' in val:
-                return 'background-color: #f8d7da; color: #721c24'
+            if "increasing" in val:
+                return "background-color: #d4edda; color: #155724"
+            elif "decreasing" in val:
+                return "background-color: #f8d7da; color: #721c24"
             else:
-                return 'background-color: #d1ecf1; color: #0c5460'
+                return "background-color: #d1ecf1; color: #0c5460"
 
         # Display the styled results
-        styled_df = filtered_results.style.map(
-            style_trends,
-            subset=['Trend']
-        ).format({
-            'Mann-Kendall Statistic (S)': '{:.2f}',
-            'Coefficient of Variation': '{:.4f}',
-            'Confidence Factor': '{:.2f}'
-        })
+        styled_df = filtered_results.style.map(style_trends, subset=["Trend"]).format(
+            {"Mann-Kendall Statistic (S)": "{:.2f}", "Coefficient of Variation": "{:.4f}", "Confidence Factor": "{:.2f}"}
+        )
 
         st.dataframe(styled_df, use_container_width=True, height=400)
 
         # Export options for filtered data
         if st.button("📥 Download Filtered Results", type="secondary"):
             csv = filtered_results.to_csv(index=False)
-            st.download_button(
-                label="Download as CSV",
-                data=csv,
-                file_name="mann_kendall_filtered_results.csv",
-                mime="text/csv"
-            )
+            st.download_button(label="Download as CSV", data=csv, file_name="mann_kendall_filtered_results.csv", mime="text/csv")
 
     else:
         st.warning("⚠️ No results match the current filter criteria. Try adjusting your filters.")
@@ -405,7 +343,7 @@ def display_results_table(results: pd.DataFrame) -> None:
             with col3:
                 st.metric("Unique Components", filtered_results.Analise.nunique())
             with col4:
-                significant_count = len(filtered_results[filtered_results.Trend != 'no trend'])
+                significant_count = len(filtered_results[filtered_results.Trend != "no trend"])
                 st.metric("Significant Trends", significant_count)
 
             # Trend distribution for filtered results
