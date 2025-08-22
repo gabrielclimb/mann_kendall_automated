@@ -6,6 +6,8 @@ from scipy.stats import norm
 
 from mann_kendall.core.sens_slope import sens_slope
 
+CONFIDENCE_THRESHOLD_LOW = 0.9
+CONFIDENCE_THRESHOLD_HIGH = 0.95
 
 class TrendType(str, Enum):
     """Enum representing different types of trends detected by Mann-Kendall test."""
@@ -99,10 +101,11 @@ def _seasonal_mk_test(x: np.ndarray, alpha: float = 0.05, period: int = 12) -> M
     cf = 1 - p
 
     # Determine trend with seasonal prefixes - return clean string values
-    if cf < 0.9:
+    if cf < CONFIDENCE_THRESHOLD_LOW:
         trend = "seasonal no trend"  # Consolidate seasonal stable and no trend
     else:
-        if cf <= 0.95:
+        
+        if cf <= CONFIDENCE_THRESHOLD_HIGH:
             if total_s > 0:
                 trend = "seasonal probably increasing"
             else:
@@ -309,3 +312,4 @@ def mk_test(
         confidence_factor=round(cf, 3),
         slope=round(slope, 6),
     )
+
