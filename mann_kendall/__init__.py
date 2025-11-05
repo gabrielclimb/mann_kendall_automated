@@ -5,5 +5,30 @@ This package provides tools to analyze time series data for environmental engine
 automating the Mann-Kendall statistical test to identify trends in datasets.
 """
 
-__version__ = "0.1.0"
+try:
+    from importlib.metadata import version, PackageNotFoundError
+except ImportError:
+    # Python < 3.8 fallback
+    from importlib_metadata import version, PackageNotFoundError  # type: ignore
+
+try:
+    __version__ = version("mann-kendall-automated")
+except PackageNotFoundError:
+    # Package not installed, use fallback version
+    __version__ = "0.1.0-dev"
+
 __author__ = "Gabriel Barbosa Soares"
+
+# Expose main API functions
+from mann_kendall.core.mann_kendall import mk_test, MKTestResult
+from mann_kendall.core.processor import generate_mann_kendall
+from mann_kendall.data.loader import load_excel_data
+
+__all__ = [
+    "mk_test",
+    "MKTestResult",
+    "generate_mann_kendall",
+    "load_excel_data",
+    "__version__",
+    "__author__",
+]

@@ -4,11 +4,30 @@ from typing import NamedTuple
 import numpy as np
 from scipy.stats import norm
 
+from mann_kendall.core.constants import (
+    CONFIDENCE_THRESHOLD_HIGH,
+    CONFIDENCE_THRESHOLD_LOW,
+    DECIMAL_PLACES_CF,
+    DECIMAL_PLACES_CV,
+    DECIMAL_PLACES_SLOPE,
+    DECIMAL_PLACES_STATISTIC,
+    DEFAULT_ALPHA,
+    DEFAULT_PERIOD,
+    LOW_CONFIDENCE_2_POINTS,
+    LOW_CONFIDENCE_3_POINTS,
+    SEASONAL_TREND_DECREASING,
+    SEASONAL_TREND_INCREASING,
+    SEASONAL_TREND_NO_TREND,
+    SEASONAL_TREND_PROB_DECREASING,
+    SEASONAL_TREND_PROB_INCREASING,
+    TREND_DECREASING,
+    TREND_INCREASING,
+    TREND_NO_TREND,
+    TREND_PROB_DECREASING,
+    TREND_PROB_INCREASING,
+    ZERO_THRESHOLD,
+)
 from mann_kendall.core.sens_slope import sens_slope
-
-CONFIDENCE_THRESHOLD_LOW = 0.9
-CONFIDENCE_THRESHOLD_HIGH = 0.95
-ZERO_THRESHOLD = 1e-10
 
 class TrendType(str, Enum):
     """Enum representing different types of trends detected by Mann-Kendall test."""
@@ -37,7 +56,9 @@ class MKTestResult(NamedTuple):
     slope: float = 0.0
 
 
-def _seasonal_mk_test(x: np.ndarray, alpha: float = 0.05, period: int = 12) -> MKTestResult:
+def _seasonal_mk_test(
+    x: np.ndarray, alpha: float = DEFAULT_ALPHA, period: int = DEFAULT_PERIOD
+) -> MKTestResult:
     """
     Performs the seasonal Mann-Kendall test for trend detection in seasonal time series data.
 
@@ -104,33 +125,33 @@ def _seasonal_mk_test(x: np.ndarray, alpha: float = 0.05, period: int = 12) -> M
 
     # Determine trend with seasonal prefixes - return clean string values
     if cf < CONFIDENCE_THRESHOLD_LOW:
-        trend = "seasonal no trend"  # Consolidate seasonal stable and no trend
+        trend = SEASONAL_TREND_NO_TREND  # Consolidate seasonal stable and no trend
     else:
 
         if cf <= CONFIDENCE_THRESHOLD_HIGH:
             if total_s > 0:
-                trend = "seasonal probably increasing"
+                trend = SEASONAL_TREND_PROB_INCREASING
             else:
-                trend = "seasonal probably decreasing"
+                trend = SEASONAL_TREND_PROB_DECREASING
         else:
             if total_s > 0:
-                trend = "seasonal increasing"
+                trend = SEASONAL_TREND_INCREASING
             else:
-                trend = "seasonal decreasing"
+                trend = SEASONAL_TREND_DECREASING
 
     return MKTestResult(
         trend=trend,
-        statistic=round(total_s, 4),
-        coefficient_of_variation=round(cv, 2),
-        confidence_factor=round(cf, 3),
+        statistic=round(total_s, DECIMAL_PLACES_STATISTIC),
+        coefficient_of_variation=round(cv, DECIMAL_PLACES_CV),
+        confidence_factor=round(cf, DECIMAL_PLACES_CF),
     )
 
 
 def mk_test(
     x: np.ndarray,
-    alpha: float = 0.05,
+    alpha: float = DEFAULT_ALPHA,
     seasonal: bool = False,
-    period: int = 12,
+    period: int = DEFAULT_PERIOD,
     calculate_slope: bool = True,
 ) -> MKTestResult:
     """
@@ -186,22 +207,22 @@ def mk_test(
         # For fewer than 4 points, we can still calculate but results are less reliable
         # Return a simple trend based on first and last values
         if len(x) == 2:
-            trend = "increasing" if x[1] > x[0] else "decreasing" if x[1] < x[0] else "no trend"
+            trend = TREND_INCREASING if x[1] > x[0] else TREND_DECREASING if x[1] < x[0] else TREND_NO_TREND
             return MKTestResult(
                 trend=trend,
                 statistic=1.0 if x[1] > x[0] else -1.0 if x[1] < x[0] else 0.0,
                 coefficient_of_variation=np.std(x, ddof=1) / np.mean(x) if np.mean(x) != 0 else 0.0,
-                confidence_factor=0.5,  # Low confidence due to insufficient data
+                confidence_factor=LOW_CONFIDENCE_2_POINTS,  # Low confidence due to insufficient data
             )
         elif len(x) == 3:
             # Simple comparison for 3 points
             s = np.sign(x[1] - x[0]) + np.sign(x[2] - x[0]) + np.sign(x[2] - x[1])
-            trend = "increasing" if s > 0 else "decreasing" if s < 0 else "no trend"
+            trend = TREND_INCREASING if s > 0 else TREND_DECREASING if s < 0 else TREND_NO_TREND
             return MKTestResult(
                 trend=trend,
                 statistic=float(s),
                 coefficient_of_variation=np.std(x, ddof=1) / np.mean(x) if np.mean(x) != 0 else 0.0,
-                confidence_factor=0.6,  # Low confidence due to insufficient data
+                confidence_factor=LOW_CONFIDENCE_3_POINTS,  # Low confidence due to insufficient data
             )
 
     # Check if input contains NaN values
@@ -211,7 +232,7 @@ def mk_test(
     # Check if all values are identical
     if np.all(x == x[0]):
         return MKTestResult(
-            trend="no trend", statistic=0.0, coefficient_of_variation=0.0, confidence_factor=0.0
+            trend=TREND_NO_TREND, statistic=0.0, coefficient_of_variation=0.0, confidence_factor=0.0
         )
 
     n = len(x)
@@ -283,19 +304,19 @@ def mk_test(
 
     # Determine trend classification based on confidence factor, s value, and coefficient of variation
     # Always return clean string values, not enum objects
-    if cf < 0.9:  # Low confidence (< 90%)
-        trend = "no trend"  # Consolidate stable and no trend into single category
+    if cf < CONFIDENCE_THRESHOLD_LOW:  # Low confidence (< 90%)
+        trend = TREND_NO_TREND  # Consolidate stable and no trend into single category
     else:  # Higher confidence (>= 90%)
-        if cf <= 0.95:  # Between 90% and 95% confidence
+        if cf <= CONFIDENCE_THRESHOLD_HIGH:  # Between 90% and 95% confidence
             if s > 0:
-                trend = "probably increasing"  # Probable increasing trend
+                trend = TREND_PROB_INCREASING  # Probable increasing trend
             else:
-                trend = "probably decreasing"  # Probable decreasing trend
+                trend = TREND_PROB_DECREASING  # Probable decreasing trend
         else:  # Above 95% confidence
             if s > 0:
-                trend = "increasing"  # Strong increasing trend
+                trend = TREND_INCREASING  # Strong increasing trend
             else:
-                trend = "decreasing"  # Strong decreasing trend
+                trend = TREND_DECREASING  # Strong decreasing trend
 
     # Calculate Sen's slope if requested
     slope = 0.0
@@ -309,9 +330,9 @@ def mk_test(
     # Return a named tuple for better readability and type hinting
     return MKTestResult(
         trend=trend,
-        statistic=round(s, 4),
-        coefficient_of_variation=round(cv, 2),
-        confidence_factor=round(cf, 3),
-        slope=round(slope, 6),
+        statistic=round(s, DECIMAL_PLACES_STATISTIC),
+        coefficient_of_variation=round(cv, DECIMAL_PLACES_CV),
+        confidence_factor=round(cf, DECIMAL_PLACES_CF),
+        slope=round(slope, DECIMAL_PLACES_SLOPE),
     )
 

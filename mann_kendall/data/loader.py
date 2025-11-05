@@ -1,11 +1,25 @@
 from io import BytesIO
+from pathlib import Path
 from typing import BinaryIO, Union
 
 import pandas as pd
 
+from mann_kendall.core.constants import (
+    MAX_FILE_SIZE_BYTES,
+    MIN_POINTS_FOR_RELIABLE_TEST,
+    MIN_SAMPLES_PER_COMPONENT,
+    SUPPORTED_FILE_EXTENSIONS,
+)
+from mann_kendall.utils.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 
 # noqa: E501
-def load_excel_data(file_content: Union[str, bytes, BinaryIO]) -> pd.DataFrame:
+def load_excel_data(
+    file_content: Union[str, bytes, BinaryIO],
+    max_size: int = MAX_FILE_SIZE_BYTES
+) -> pd.DataFrame:
     """
     Loads data from an Excel file into a pandas DataFrame and validates its format.
 
@@ -13,6 +27,7 @@ def load_excel_data(file_content: Union[str, bytes, BinaryIO]) -> pd.DataFrame:
         file_content (Union[str, bytes, BinaryIO]):
             Either a file path string, bytes object containing Excel data,
             or a file-like object.
+        max_size: Maximum allowed file size in bytes (default: 10MB)
 
     Returns:
         pd.DataFrame: DataFrame containing the loaded data with index_col=0 and no header
@@ -20,12 +35,48 @@ def load_excel_data(file_content: Union[str, bytes, BinaryIO]) -> pd.DataFrame:
     Raises:
         pd.errors.EmptyDataError: If the file is empty
         pd.errors.ParserError: If the file cannot be parsed as an Excel file
-        ValueError: If the file format is invalid
+        ValueError: If the file format is invalid or file is too large
         FileNotFoundError: If the file doesn't exist (when path is provided)
+
+    Examples:
+        >>> df = load_excel_data("path/to/file.xlsx")
+        >>> df = load_excel_data(file_bytes)
     """
     try:
+        # Validate file extension if path is provided
+        if isinstance(file_content, str):
+            file_path = Path(file_content)
+            if not file_path.exists():
+                raise FileNotFoundError(f"File not found: {file_content}")
+            if file_path.suffix.lower() not in SUPPORTED_FILE_EXTENSIONS:
+                raise ValueError(
+                    f"Unsupported file type: {file_path.suffix}. "
+                    f"Supported formats: {', '.join(SUPPORTED_FILE_EXTENSIONS)}"
+                )
+            # Check file size
+            file_size = file_path.stat().st_size
+            if file_size > max_size:
+                raise ValueError(
+                    f"File too large: {file_size:,} bytes (max: {max_size:,} bytes / "
+                    f"{max_size / (1024 * 1024):.1f} MB)"
+                )
+            logger.info("Loading Excel file: %s (Size: %d bytes)", file_content, file_size)
+
         if isinstance(file_content, bytes):
+            # Check byte content size
+            if len(file_content) > max_size:
+                raise ValueError(
+                    f"File too large: {len(file_content):,} bytes (max: {max_size:,} bytes / "
+                    f"{max_size / (1024 * 1024):.1f} MB)"
+                )
+            logger.info("Loading Excel file from bytes (Size: %d bytes)", len(file_content))
             file_content = BytesIO(file_content)
+
+        # Check file-like object size if it has a size attribute
+        if hasattr(file_content, 'size') and file_content.size > max_size:
+            raise ValueError(
+                f"File too large: {file_content.size:,} bytes (max: {max_size:,} bytes)"
+            )
 
         df = pd.read_excel(file_content, header=None, index_col=0, engine="openpyxl")
         validate_input_format(df)
@@ -100,16 +151,17 @@ def check_data_sufficiency(df: pd.DataFrame) -> tuple[bool, str]:
     Returns:
         Tuple of (is_sufficient, warning_message)
     """
-    if len(df.index) < 4:
+    if len(df.index) < MIN_SAMPLES_PER_COMPONENT:
         return (
             False,
-            f"""Your data has only {len(df.index)} time points. 
-            Mann-Kendall test works best with at least 4 data points.""",
+            f"""Your data has only {len(df.index)} time points.
+            Mann-Kendall test requires at least {MIN_SAMPLES_PER_COMPONENT} data points.""",
         )
-    elif len(df.index) < 6:
+    elif len(df.index) < MIN_POINTS_FOR_RELIABLE_TEST:
         return (
             True,
-            f"Your data has {len(df.index)} time points. Consider adding more data points for more reliable trend detection.",
+            f"Your data has {len(df.index)} time points. Consider adding more data points "
+            f"for more reliable trend detection (recommended: {MIN_POINTS_FOR_RELIABLE_TEST}+).",
         )
 
     return True, ""
