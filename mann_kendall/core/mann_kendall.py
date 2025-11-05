@@ -29,6 +29,7 @@ from mann_kendall.core.constants import (
 )
 from mann_kendall.core.sens_slope import sens_slope
 
+
 class TrendType(str, Enum):
     """Enum representing different types of trends detected by Mann-Kendall test."""
 
@@ -207,22 +208,36 @@ def mk_test(
         # For fewer than 4 points, we can still calculate but results are less reliable
         # Return a simple trend based on first and last values
         if len(x) == 2:
-            trend = TREND_INCREASING if x[1] > x[0] else TREND_DECREASING if x[1] < x[0] else TREND_NO_TREND
+            if x[1] > x[0]:
+                trend = TREND_INCREASING
+            elif x[1] < x[0]:
+                trend = TREND_DECREASING
+            else:
+                trend = TREND_NO_TREND
             return MKTestResult(
                 trend=trend,
                 statistic=1.0 if x[1] > x[0] else -1.0 if x[1] < x[0] else 0.0,
-                coefficient_of_variation=np.std(x, ddof=1) / np.mean(x) if np.mean(x) != 0 else 0.0,
-                confidence_factor=LOW_CONFIDENCE_2_POINTS,  # Low confidence due to insufficient data
+                coefficient_of_variation=(
+                    np.std(x, ddof=1) / np.mean(x) if np.mean(x) != 0 else 0.0
+                ),
+                confidence_factor=LOW_CONFIDENCE_2_POINTS,
             )
         elif len(x) == 3:
             # Simple comparison for 3 points
             s = np.sign(x[1] - x[0]) + np.sign(x[2] - x[0]) + np.sign(x[2] - x[1])
-            trend = TREND_INCREASING if s > 0 else TREND_DECREASING if s < 0 else TREND_NO_TREND
+            if s > 0:
+                trend = TREND_INCREASING
+            elif s < 0:
+                trend = TREND_DECREASING
+            else:
+                trend = TREND_NO_TREND
             return MKTestResult(
                 trend=trend,
                 statistic=float(s),
-                coefficient_of_variation=np.std(x, ddof=1) / np.mean(x) if np.mean(x) != 0 else 0.0,
-                confidence_factor=LOW_CONFIDENCE_3_POINTS,  # Low confidence due to insufficient data
+                coefficient_of_variation=(
+                    np.std(x, ddof=1) / np.mean(x) if np.mean(x) != 0 else 0.0
+                ),
+                confidence_factor=LOW_CONFIDENCE_3_POINTS,
             )
 
     # Check if input contains NaN values
@@ -302,7 +317,7 @@ def mk_test(
     # Confidence Factor - derived from p-value
     cf = 1 - p
 
-    # Determine trend classification based on confidence factor, s value, and coefficient of variation
+    # Determine trend classification based on confidence factor, s value, and CV
     # Always return clean string values, not enum objects
     if cf < CONFIDENCE_THRESHOLD_LOW:  # Low confidence (< 90%)
         trend = TREND_NO_TREND  # Consolidate stable and no trend into single category

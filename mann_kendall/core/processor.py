@@ -49,7 +49,8 @@ def transpose_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     else:
         raise ValueError(
             "DataFrame must have at least two columns after transposition. "
-            "Expected format: First column should contain dates, subsequent columns should contain well data."
+            "Expected format: First column should contain dates, "
+            "subsequent columns should contain well data."
         )
     
     # Convert date columns to datetime where possible
@@ -103,7 +104,8 @@ def process_well_data(well_name: str, df_transposto: pd.DataFrame, columns: list
             values = df_temp.loc[:, column].apply(string_to_float).fillna(0).values
             raise TypeError(
                 f"Incorrect values in well '{well_name}', column '{column}': {values}. "
-                f"Please ensure all values are numeric or recognized markers (ND, N/D, etc.). Error: {e}"
+                f"Please ensure all values are numeric or recognized markers "
+                f"(ND, N/D, etc.). Error: {e}"
             )
         except ZeroDivisionError:
             # This could happen if all values are zero (CV calculation would fail)
@@ -131,7 +133,8 @@ def generate_mann_kendall(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]
         error_msg = (
             "Input data contains values that cannot be converted to float. "
             "Please check the error messages above for specific columns and values. "
-            "Acceptable formats: numeric values, 'ND', 'N/D', 'NOT DETECTED', or values with '<' prefix."
+            "Acceptable formats: numeric values, 'ND', 'N/D', 'NOT DETECTED', "
+            "or values with '<' prefix."
         )
         logger.error(error_msg)
         raise TypeError(error_msg)

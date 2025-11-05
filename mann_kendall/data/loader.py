@@ -82,9 +82,13 @@ def load_excel_data(
         validate_input_format(df)
         return df
     except pd.errors.EmptyDataError:
-        raise pd.errors.EmptyDataError("The uploaded file is empty. Please provide a file with data.")
+        raise pd.errors.EmptyDataError(
+            "The uploaded file is empty. Please provide a file with data."
+        )
     except pd.errors.ParserError:
-        raise pd.errors.ParserError("Unable to parse the file. Please ensure it's a valid Excel file.")
+        raise pd.errors.ParserError(
+            "Unable to parse the file. Please ensure it's a valid Excel file."
+        )
     except ValueError as e:
         raise ValueError(f"Invalid file format: {str(e)}")
     except Exception as e:
@@ -126,7 +130,9 @@ def validate_input_format(df: pd.DataFrame) -> bool:
     except (ValueError, TypeError):
         pass
 
-    if not has_date_format and not isinstance(df.index[0], pd.Timestamp) and not pd.isna(df.index[0]):
+    is_timestamp = isinstance(df.index[0], pd.Timestamp)
+    is_na = pd.isna(df.index[0])
+    if not has_date_format and not is_timestamp and not is_na:
         raise ValueError("First column must contain valid dates or date-like strings")
 
     if df.columns.isna().any():

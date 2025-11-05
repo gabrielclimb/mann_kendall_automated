@@ -6,10 +6,10 @@ automating the Mann-Kendall statistical test to identify trends in datasets.
 """
 
 try:
-    from importlib.metadata import version, PackageNotFoundError
+    from importlib.metadata import PackageNotFoundError, version
 except ImportError:
     # Python < 3.8 fallback
-    from importlib_metadata import version, PackageNotFoundError  # type: ignore
+    from importlib_metadata import PackageNotFoundError, version  # type: ignore
 
 try:
     __version__ = version("mann-kendall-automated")
@@ -20,7 +20,7 @@ except PackageNotFoundError:
 __author__ = "Gabriel Barbosa Soares"
 
 # Expose main API functions
-from mann_kendall.core.mann_kendall import mk_test, MKTestResult
+from mann_kendall.core.mann_kendall import MKTestResult, mk_test
 from mann_kendall.core.processor import generate_mann_kendall
 from mann_kendall.data.loader import load_excel_data
 

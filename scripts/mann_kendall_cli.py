@@ -8,8 +8,6 @@ Supports batch processing, verbose output, and various export formats.
 """
 
 import argparse
-import json
-import logging
 import os
 import sys
 from datetime import datetime
