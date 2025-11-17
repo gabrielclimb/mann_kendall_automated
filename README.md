@@ -72,11 +72,23 @@ pip install -e .
 
 #### For Development
 
+**Option 1: Using pip (recommended)**
+
 ```bash
 git clone https://github.com/gabrielclimb/mann_kendall_automated.git
 cd mann_kendall_automated
 pip install -e ".[dev]"
 pre-commit install  # Set up git hooks
+```
+
+**Option 2: Using Rye**
+
+```bash
+git clone https://github.com/gabrielclimb/mann_kendall_automated.git
+cd mann_kendall_automated
+curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
+export PATH="$HOME/.rye/shims:$PATH"
+rye sync  # Installs all dependencies including dev
 ```
 
 ## 📖 Usage

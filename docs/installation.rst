@@ -31,7 +31,9 @@ To install from source (for development or to get the latest unreleased features
 Development Installation
 ------------------------
 
-If you want to contribute to the project, install with development dependencies:
+If you want to contribute to the project, install with development dependencies.
+
+**Option 1: Using pip (recommended)**
 
 .. code-block:: bash
 
@@ -40,7 +42,17 @@ If you want to contribute to the project, install with development dependencies:
    pip install -e ".[dev]"
    pre-commit install
 
-This installs additional tools for:
+**Option 2: Using Rye**
+
+.. code-block:: bash
+
+   git clone https://github.com/gabrielclimb/mann_kendall_automated.git
+   cd mann_kendall_automated
+   curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
+   export PATH="$HOME/.rye/shims:$PATH"
+   rye sync
+
+Both methods install additional tools for:
 
 * Testing (pytest, pytest-cov)
 * Code formatting (black, isort, ruff)

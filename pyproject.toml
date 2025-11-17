@@ -53,13 +53,8 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "ruff>=0.0.272",
-]
+# Dev dependencies are defined in [project.optional-dependencies]
+# Rye will automatically use them when running 'rye sync'
 
 [tool.rye.scripts]
 req = "uv pip compile pyproject.toml -o requirements.txt"
