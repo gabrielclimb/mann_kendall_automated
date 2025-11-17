@@ -79,6 +79,13 @@ def main() -> None:
             help="Upload your Excel file with time series data",
         )
 
+        # Auto-analyze toggle
+        auto_analyze = st.checkbox(
+            "🔄 Auto-analyze on upload",
+            value=True,
+            help="Automatically run analysis when a new file is uploaded"
+        )
+
         # Show input format example with better formatting
         with st.expander("📋 Required Format", expanded=False):
             st.markdown("""
@@ -111,6 +118,7 @@ def main() -> None:
     if "processed_data" not in st.session_state:
         st.session_state.processed_data = None
         st.session_state.results = None
+        st.session_state.last_file_id = None
 
     # Process data when file is uploaded
     if file_upload:
@@ -138,14 +146,36 @@ def main() -> None:
             elif warning_msg:
                 st.info(f"ℹ️ **Data Quality Note:** {warning_msg}")
 
-            # Step 4: Processing confirmation
-            if st.button("🚀 Run Mann-Kendall Analysis", type="primary", use_container_width=True):
+            # Step 4: Detect new file and determine if analysis should run
+            # Create unique identifier for the current file
+            current_file_id = f"{file_upload.name}_{file_upload.size}" if file_upload else None
+            is_new_file = (current_file_id != st.session_state.last_file_id) and current_file_id is not None
+
+            # Determine if we should run analysis (auto or manual)
+            should_analyze = False
+
+            if is_new_file and auto_analyze:
+                st.info("📊 New file detected - analyzing automatically...")
+                should_analyze = True
+
+            # Show manual run button
+            manual_trigger = st.button(
+                "🚀 Run Mann-Kendall Analysis" if not is_new_file else "🔄 Re-run Analysis",
+                type="primary",
+                use_container_width=True
+            )
+
+            if manual_trigger:
+                should_analyze = True
+
+            # Step 5: Run analysis if triggered
+            if should_analyze:
                 # Create progress bar
                 progress_bar = st.progress(0)
                 status_text = st.empty()
 
                 try:
-                    # Step 5: Process the data with progress updates
+                    # Step 6: Process the data with progress updates
                     status_text.text("🔄 Transposing and cleaning data...")
                     progress_bar.progress(25)
 
@@ -158,6 +188,7 @@ def main() -> None:
                     # Store results in session state
                     st.session_state.results = results
                     st.session_state.processed_data = dataframe
+                    st.session_state.last_file_id = current_file_id
 
                     # Clear progress indicators
                     progress_bar.empty()
