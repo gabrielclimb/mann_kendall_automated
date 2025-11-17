@@ -89,7 +89,31 @@ Required packages (automatically installed):
 * xlrd >= 2.0.1
 * xlsxwriter >= 3.2.0
 
-Optional dependencies:
+Optional dependencies for development:
 
-* sphinx (for building documentation)
-* pytest (for running tests)
+* pytest, pytest-cov (testing)
+* black, isort, ruff (code formatting)
+* mypy (type checking)
+
+Optional dependencies for documentation:
+
+* sphinx, sphinx-rtd-theme (documentation generation)
+* sphinx-autodoc-typehints (type hint support in docs)
+* myst-parser (Markdown support in Sphinx)
+
+Building Documentation
+----------------------
+
+To build the documentation locally:
+
+.. code-block:: bash
+
+   # Install documentation dependencies
+   pip install -e ".[docs]"
+
+   # Build HTML documentation
+   cd docs
+   sphinx-build -b html . _build/html
+
+   # View the documentation
+   # Open docs/_build/html/index.html in your browser

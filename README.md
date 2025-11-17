@@ -91,6 +91,17 @@ export PATH="$HOME/.rye/shims:$PATH"
 rye sync  # Installs all dependencies including dev
 ```
 
+#### For Documentation Contributors
+
+To build the documentation:
+
+```bash
+pip install -e ".[docs]"
+cd docs
+sphinx-build -b html . _build/html
+# Open docs/_build/html/index.html in your browser
+```
+
 ## 📖 Usage
 
 ### 1. Web Application
