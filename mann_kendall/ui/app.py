@@ -79,13 +79,6 @@ def main() -> None:
             help="Upload your Excel file with time series data",
         )
 
-        # Auto-analyze toggle
-        auto_analyze = st.checkbox(
-            "🔄 Auto-analyze on upload",
-            value=True,
-            help="Automatically run analysis when a new file is uploaded"
-        )
-
         # Show input format example with better formatting
         with st.expander("📋 Required Format", expanded=False):
             st.markdown("""
@@ -154,7 +147,7 @@ def main() -> None:
             # Determine if we should run analysis (auto or manual)
             should_analyze = False
 
-            if is_new_file and auto_analyze:
+            if is_new_file:
                 st.info("📊 New file detected - analyzing automatically...")
                 should_analyze = True
 
