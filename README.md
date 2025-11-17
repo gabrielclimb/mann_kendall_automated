@@ -231,8 +231,10 @@ For developers:
 
 1. Create a virtual environment: `python -m venv venv`
 2. Activate it: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
-3. Install dev dependencies: `pip install -e ".[dev]"`
+3. Install with dev dependencies: `pip install -e ".[dev]"`
 4. Run tests: `pytest`
+
+Note: Now that the project includes [project.optional-dependencies], the `pip install -e ".[dev]"` command will work correctly to install all development dependencies.
 
 ## License
 
