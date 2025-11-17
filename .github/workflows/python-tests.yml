@@ -29,18 +29,15 @@ jobs:
     - name: Install dependencies with Rye
       run: |
         rye sync
-        . .venv/bin/activate
-        pip install -e ".[dev]"
+        .venv/bin/python -m pip install -e ".[dev]"
 
     - name: Lint with ruff
       run: |
-        . .venv/bin/activate
-        python -m ruff check mann_kendall tests scripts
+        .venv/bin/python -m ruff check mann_kendall tests scripts
 
     - name: Test with pytest
       run: |
-        . .venv/bin/activate
-        pytest --cov=mann_kendall tests/
+        .venv/bin/python -m pytest --cov=mann_kendall tests/
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
