@@ -10,7 +10,7 @@ pickleshare==0.7.5
 Pillow==10.2.0
 plotly==5.14.1
 pluggy==1.0.0
-pre_commit==3.3.2
+pre_commit==4.3.0
 protobuf==4.25.8
 pyarrow==14.0.1
 pydeck==0.8.1b0
