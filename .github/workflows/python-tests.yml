@@ -34,7 +34,7 @@ jobs:
     - name: Lint with ruff
       run: |
         . .venv/bin/activate
-        ruff check mann_kendall tests scripts
+        python -m ruff check mann_kendall tests scripts
 
     - name: Test with pytest
       run: |
