@@ -30,6 +30,7 @@ jobs:
       run: |
         rye sync
         . .venv/bin/activate
+        pip install -e ".[dev]"
 
     - name: Lint with ruff
       run: |
