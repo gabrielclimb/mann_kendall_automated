@@ -1,8 +1,63 @@
+# Development files
 debug.py
-*__pycache__
-*.vscode
-*.DS_Store
-*.coverage
-*.pytest_cache
+
+# Python cache
+*__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
 venv/
+env/
+ENV/
+.venv
+
+# IDE
+*.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+*.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
 pytest-coverage.txt
+.cache
+
+# Linting and formatting
+.mypy_cache/
+.ruff_cache/
+.pylint.d/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+*.egg
+wheels/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Documentation builds
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Logs
+*.log
+
+# Legacy code (deprecated)
+src/

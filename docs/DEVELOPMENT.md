@@ -44,8 +44,12 @@ This guide provides instructions for developers who want to contribute to Mann K
 
 3. Install dependencies:
    ```bash
-   pip install -e .
-   pip install pytest pytest-cov black isort ruff
+   pip install -e ".[dev]"
+   ```
+
+4. Set up pre-commit hooks (optional but recommended):
+   ```bash
+   pre-commit install
    ```
 
 ## Project Structure

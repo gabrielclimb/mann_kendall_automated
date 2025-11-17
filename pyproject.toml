@@ -17,10 +17,27 @@ dependencies = [
     "streamlit>=1.38.0",
     "xlrd>=2.0.1",
     "xlsxwriter>=3.2.0",
-    "pandas>=2.2.2",
-    "scipy>=1.14.1",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
     "openpyxl>=3.1.5",
     "plotly>=5.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "ruff>=0.0.272",
+    "mypy>=1.0.0",
+]
+docs = [
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinx-autodoc-typehints>=1.19.0",
+    "myst-parser>=0.18.0",
 ]
 
 [project.scripts]
@@ -42,6 +59,7 @@ dev-dependencies = [
     "black>=23.0.0",
     "isort>=5.12.0",
     "ruff>=0.0.272",
+    "mypy>=1.0.0",
 ]
 
 [tool.rye.scripts]
@@ -63,12 +81,12 @@ target-version = "py38"
 select = ["E", "F", "I", "UP"]
 
 [tool.black]
-line-length = 100
+line-length = 130
 target-version = ["py38"]
 
 [tool.isort]
 profile = "black"
-line_length = 100
+line_length = 130
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
