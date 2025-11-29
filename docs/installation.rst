@@ -42,15 +42,13 @@ If you want to contribute to the project, install with development dependencies.
    pip install -e ".[dev]"
    pre-commit install
 
-**Option 2: Using Rye**
+**Option 2: Using uv (Recommended)**
 
 .. code-block:: bash
 
    git clone https://github.com/gabrielclimb/mann_kendall_automated.git
    cd mann_kendall_automated
-   curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
-   export PATH="$HOME/.rye/shims:$PATH"
-   rye sync
+   uv sync
 
 Both methods install additional tools for:
 

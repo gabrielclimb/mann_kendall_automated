@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Separated concerns: core, data, UI, and utilities
 - Enhanced Streamlit UI with tabs and improved layout
 - Updated dependency management with pyproject.toml
-- Migrated to Rye for Python package management
+- Migrated to uv for Python package management
 
 ### Fixed
 - Better error handling in data loading
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Refactored to use context manager with pd.ExcelWriter for better resource management
-- Updated development documentation to use Rye package manager
+- Updated development documentation to use uv package manager
 - Added type hints to function signatures
 
 ### Fixed

@@ -81,14 +81,13 @@ pip install -e ".[dev]"
 pre-commit install  # Set up git hooks
 ```
 
-**Option 2: Using Rye**
+**Option 2: Using uv (Recommended)**
 
 ```bash
 git clone https://github.com/gabrielclimb/mann_kendall_automated.git
 cd mann_kendall_automated
-curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
-export PATH="$HOME/.rye/shims:$PATH"
-rye sync  # Installs all dependencies including dev
+# Install dependencies including dev
+uv sync
 ```
 
 #### For Documentation Contributors

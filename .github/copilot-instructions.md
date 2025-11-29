@@ -10,14 +10,13 @@ Mann Kendall Automated is a Python statistical analysis tool for environmental e
 
 **CRITICAL - Network Dependencies**: Dependency installation often fails due to firewall limitations. Set timeouts of 60+ minutes and be prepared for failures.
 
-#### Preferred Setup (Rye)
+#### Preferred Setup (uv)
 ```bash
-# Install Rye (may fail due to network restrictions)
-curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
-export PATH="$HOME/.rye/shims:$PATH"
+# Install uv (may fail due to network restrictions)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Set up environment - NEVER CANCEL: Takes 3-5 minutes. Set timeout to 10+ minutes
-rye sync
+uv sync
 ```
 
 #### Alternative Setup (pip) 
@@ -58,7 +57,7 @@ ruff check mann_kendall tests scripts
 #### Web Application
 ```bash
 # ALWAYS activate environment first
-source venv/bin/activate  # or . .venv/bin/activate for Rye
+source venv/bin/activate  # or . .venv/bin/activate for uv
 
 # Start Streamlit web app - NEVER CANCEL: App startup takes 30-60 seconds
 streamlit run app.py
@@ -180,7 +179,7 @@ mann_kendall_automated/
 The project uses GitHub Actions with:
 - **Matrix Testing**: Python 3.8, 3.9, 3.10 on Ubuntu
 - **Required Checks**: ruff linting, pytest with coverage
-- **Build Process**: Rye sync, dependency caching
+- **Build Process**: uv sync, dependency caching
 - **Timeout Settings**: Default 5-minute job timeout
 
 When making changes, ensure they pass:

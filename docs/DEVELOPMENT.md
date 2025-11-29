@@ -8,9 +8,9 @@ This guide provides instructions for developers who want to contribute to Mann K
 
 - Python 3.8 or later
 - Git
-- [Rye](https://rye-up.com/) (recommended) or other Python environment manager
+- [uv](https://github.com/astral-sh/uv) (recommended) or other Python environment manager
 
-### Setup with Rye (Recommended)
+### Setup with uv (Recommended)
 
 1. Clone the repository:
    ```bash
@@ -18,17 +18,17 @@ This guide provides instructions for developers who want to contribute to Mann K
    cd mann_kendall_automated
    ```
 
-2. Set up the environment with Rye:
+2. Set up the environment with uv:
    ```bash
-   rye sync
+   uv sync
    ```
 
 3. Activate the environment:
    ```bash
-   . .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
-### Alternative Setup (without Rye)
+### Alternative Setup (without uv)
 
 1. Clone the repository:
    ```bash
@@ -138,16 +138,10 @@ When adding new features:
 1. Update version in `pyproject.toml`
 2. Update CHANGELOG.md
 3. Create a new GitHub release with release notes
-4. If using Rye:
+4. Build and publish:
    ```bash
-   rye build
-   rye publish
-   ```
-   
-   If not using Rye:
-   ```bash
-   python -m build
-   python -m twine upload dist/*
+   uv build
+   uv publish
    ```
 
 ## CI/CD
@@ -159,7 +153,7 @@ GitHub Actions are used for:
 
 ## Additional Resources
 
-- [Rye Documentation](https://rye-up.com/guide/)
+- [uv Documentation](https://docs.astral.sh/uv/)
 - [Streamlit Documentation](https://docs.streamlit.io/)
 - [Mann-Kendall Test Documentation](http://vsp.pnnl.gov/help/Vsample/Design_Trend_Mann_Kendall.htm)
 - [Pandas Documentation](https://pandas.pydata.org/docs/)
