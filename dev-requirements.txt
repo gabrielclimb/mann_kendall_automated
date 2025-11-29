@@ -16,7 +16,7 @@ pyarrow==14.0.1
 pydeck==0.8.1b0
 pytest==7.3.1
 pytest-cov==7.0.0
-scipy==1.10.0
+scipy==1.13.1
 streamlit==1.30.0
 xlrd==1.2.0
 XlsxWriter==3.2.9
