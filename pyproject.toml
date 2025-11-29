@@ -51,9 +51,8 @@ Homepage = "https://github.com/gabrielclimb/mann_kendall_automated"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-managed = true
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "black>=23.0.0",
@@ -61,11 +60,6 @@ dev-dependencies = [
     "ruff>=0.0.272",
     "mypy>=1.0.0",
 ]
-
-[tool.rye.scripts]
-req = "uv pip compile pyproject.toml -o requirements.txt"
-stream = "streamlit run app.py"
-test = "pytest tests/ --cov=mann_kendall --cache-clear"
 
 [tool.hatch.metadata]
 allow-direct-references = true
