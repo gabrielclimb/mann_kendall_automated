@@ -9,7 +9,7 @@ pexpect==4.8.0
 pickleshare==0.7.5
 Pillow==10.2.0
 plotly==5.14.1
-pluggy==1.0.0
+pluggy==1.6.0
 pre_commit==4.3.0
 protobuf==4.25.8
 pyarrow==14.0.1
