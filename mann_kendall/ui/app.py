@@ -11,6 +11,7 @@ from mann_kendall.core.processor import generate_mann_kendall
 from mann_kendall.data.cleaner import get_columns_with_incorrect_values
 from mann_kendall.data.loader import check_data_sufficiency, load_excel_data
 from mann_kendall.ui.download import create_enhanced_download_section
+from mann_kendall.ui.feedback import create_feedback_section
 from mann_kendall.ui.visualizer import create_trend_plot, display_results_table
 
 
@@ -42,9 +43,6 @@ def validate_file_format(df: pd.DataFrame) -> Tuple[bool, str]:
     return True, ""
 
 
-
-
-
 def main() -> None:
     """
     Main function for the Streamlit app.
@@ -60,11 +58,13 @@ def main() -> None:
 
     # Header and description
     st.title("📈 Mann Kendall Automated")
-    st.markdown("""
+    st.markdown(
+        """
     **Automated trend analysis using the Mann-Kendall statistical test**
 
     Perfect for environmental engineering and geology applications. Upload your Excel file to detect trends in your time series data.
-    """)
+    """
+    )
 
     # File uploader in sidebar
     with st.sidebar:
@@ -81,7 +81,8 @@ def main() -> None:
 
         # Show input format example with better formatting
         with st.expander("📋 Required Format", expanded=False):
-            st.markdown("""
+            st.markdown(
+                """
             **Your Excel file should be structured like this:**
 
             | | Well_1 | Well_1 | Well_1 |
@@ -96,16 +97,25 @@ def main() -> None:
             - **Row 2**: Dates for each measurement (yyyy-mm-dd format)
             - **Row 3+**: Component name in first column + values for each well/date combination
             - Use "ND" or "N/D" for non-detected values
-            """)
+            """
+            )
 
         # Add helpful tips
         with st.expander("💡 Tips for Best Results"):
-            st.markdown("""
+            st.markdown(
+                """
             - Ensure at least 5 data points per well for reliable results
             - Use consistent date formats
             - Remove any header rows except column names
             - Check for typos in well names and dates
-            """)
+            """
+            )
+
+        # Add visual separator
+        st.divider()
+
+        # Add feedback section
+        create_feedback_section()
 
     # Initialize session state for data persistence
     if "processed_data" not in st.session_state:
@@ -127,15 +137,11 @@ def main() -> None:
                 st.info("💡 Please check the format requirements in the sidebar and try again.")
                 return
 
-
-
             # Step 3.5: Check data sufficiency and show warnings
             is_sufficient, warning_msg = check_data_sufficiency(df)
             if not is_sufficient:
                 st.warning(f"⚠️ **Data Sufficiency Warning:** {warning_msg}")
-                st.info(
-                    "💡 You can still proceed with the analysis, but results may be less reliable."
-                )
+                st.info("💡 You can still proceed with the analysis, but results may be less reliable.")
             elif warning_msg:
                 st.info(f"ℹ️ **Data Quality Note:** {warning_msg}")
 
@@ -155,7 +161,7 @@ def main() -> None:
             manual_trigger = st.button(
                 "🚀 Run Mann-Kendall Analysis" if not is_new_file else "🔄 Re-run Analysis",
                 type="primary",
-                use_container_width=True
+                use_container_width=True,
             )
 
             if manual_trigger:
@@ -188,19 +194,23 @@ def main() -> None:
                     status_text.empty()
 
                     # Success message with summary
-                    st.success(f"""
+                    st.success(
+                        f"""
                     🎉 **Analysis Complete!**
                     - Processed **{len(results.Well.unique())} wells**
                     - Analyzed **{len(results)} well-component combinations**
                     - Found **{len(results[results.Trend != "no trend"])} significant trends**
-                    """)
+                    """
+                    )
 
                     # Check for data quality issues
                     if get_columns_with_incorrect_values(dataframe):
-                        st.warning("""
+                        st.warning(
+                            """
                         ⚠️ **Data Quality Notice:** Some values in your data couldn't be converted to numbers.
                         These have been handled automatically, but you may want to review your source data for accuracy.
-                        """)
+                        """
+                        )
 
                 except Exception as e:
                     progress_bar.empty()
@@ -208,25 +218,17 @@ def main() -> None:
                     raise e
 
         except pd.errors.EmptyDataError:
-            st.error(
-                "❌ **Empty File:** The uploaded file contains no data. Please check your file and try again."
-            )
+            st.error("❌ **Empty File:** The uploaded file contains no data. Please check your file and try again.")
         except pd.errors.ParserError:
-            st.error(
-                "❌ **File Parse Error:** Unable to read the Excel file. Please ensure it's a valid .xlsx or .xls file."
-            )
+            st.error("❌ **File Parse Error:** Unable to read the Excel file. Please ensure it's a valid .xlsx or .xls file.")
         except ValueError as ve:
             st.error(f"❌ **Data Error:** {str(ve)}")
-            st.info(
-                "💡 This usually means there's an issue with your data format. Please check the format requirements."
-            )
+            st.info("💡 This usually means there's an issue with your data format. Please check the format requirements.")
         except TypeError as te:
             st.error(f"❌ **Type Error:** {str(te)}")
             st.info("💡 This typically occurs when data contains text where numbers are expected.")
         except MemoryError:
-            st.error(
-                "❌ **Memory Error:** The file is too large to process. Please try with a smaller dataset."
-            )
+            st.error("❌ **Memory Error:** The file is too large to process. Please try with a smaller dataset.")
         except Exception as e:
             st.error(f"❌ **Unexpected Error:** {str(e)}")
             st.info("💡 If this persists, please check your data format or contact support.")
@@ -237,9 +239,7 @@ def main() -> None:
 
         # Add enhanced download section to sidebar
         with st.sidebar:
-            create_enhanced_download_section(
-                st.session_state.results, st.session_state.processed_data
-            )
+            create_enhanced_download_section(st.session_state.results, st.session_state.processed_data)
 
         # Create tabs for different views
         tab1, tab2, tab3 = st.tabs(["📈 Visualization", "📋 Results Table", "📊 Summary"])
@@ -260,7 +260,8 @@ def main() -> None:
         col1, col2 = st.columns([1, 1])
 
         with col1:
-            st.markdown("""
+            st.markdown(
+                """
             ### 🎯 What is Mann-Kendall Analysis?
 
             The Mann-Kendall test is a **non-parametric statistical test** used to detect trends in time series data.
@@ -270,10 +271,12 @@ def main() -> None:
             - ✅ Handles missing data well
             - ✅ Robust against outliers
             - ✅ Widely accepted in environmental science
-            """)
+            """
+            )
 
         with col2:
-            st.markdown("""
+            st.markdown(
+                """
             ### 🔬 Perfect for:
 
             - **Environmental Monitoring** - Groundwater quality trends
@@ -281,11 +284,10 @@ def main() -> None:
             - **Climate Studies** - Temperature and precipitation trends
             - **Water Resources** - Flow and level monitoring
             - **Contamination Assessment** - Pollutant concentration changes
-            """)
+            """
+            )
 
-        st.info(
-            "👆 **Ready to get started?** Upload your Excel file using the sidebar to begin your trend analysis!"
-        )
+        st.info("👆 **Ready to get started?** Upload your Excel file using the sidebar to begin your trend analysis!")
 
 
 def display_summary_statistics(results: pd.DataFrame) -> None:
