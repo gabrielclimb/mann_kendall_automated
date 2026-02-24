@@ -148,7 +148,7 @@ mann_kendall_automated/
 - **Core logic**: `mann_kendall/core/processor.py`, `mann_kendall/core/mann_kendall.py`
 - **Tests**: `tests/` (preferred), `src/tests/` (legacy)
 - **Examples**: `examples/basic_usage.py`, `examples/example_input_table.xlsx`
-- **Config**: `pyproject.toml`, `requirements.txt`, `.pre-commit-config.yaml`
+- **Config**: `pyproject.toml`, `uv.lock`, `.pre-commit-config.yaml`
 
 ### Troubleshooting
 
