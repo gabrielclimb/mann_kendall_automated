@@ -3,6 +3,10 @@ __author__ = "Gabriel Barbosa Soares"
 import requests
 import streamlit as st
 
+from mann_kendall.utils.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 FORMSPREE_ENDPOINT = "https://formspree.io/f/xeelvjdr"
 
 
@@ -61,6 +65,11 @@ def create_feedback_section() -> None:
                             st.success("✅ Thank you! Your feedback has been sent successfully.")
                             st.balloons()
                         else:
+                            logger.error(
+                                "Formspree returned status %d: %s",
+                                response.status_code,
+                                response.text,
+                            )
                             st.error("❌ Failed to send feedback. Please try again or contact us directly.")
                     except requests.exceptions.Timeout:
                         st.error("❌ Request timed out. Please check your connection and try again.")
