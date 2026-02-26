@@ -3,7 +3,34 @@
 import logging
 from unittest.mock import MagicMock, patch
 
-from mann_kendall.ui.feedback import create_feedback_section
+from mann_kendall.ui.feedback import EMAIL_PLACEHOLDER, create_feedback_section
+
+
+@patch("mann_kendall.ui.feedback.requests.post")
+@patch("mann_kendall.ui.feedback.st")
+def test_empty_email_uses_placeholder(mock_st, mock_post):
+    """Ensure placeholder email is sent when user leaves email blank."""
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_post.return_value = mock_response
+
+    # Set up streamlit mocks for form context
+    mock_st.expander.return_value.__enter__ = MagicMock()
+    mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
+    mock_form = MagicMock()
+    mock_st.form.return_value.__enter__ = MagicMock(return_value=mock_form)
+    mock_st.form.return_value.__exit__ = MagicMock(return_value=False)
+
+    mock_st.text_input.side_effect = ["", ""]
+    mock_st.selectbox.return_value = "General Feedback"
+    mock_st.text_area.return_value = "Test feedback message"
+    mock_st.form_submit_button.return_value = True
+
+    create_feedback_section()
+
+    assert mock_post.called, "Form submission should trigger Formspree request"
+    _, kwargs = mock_post.call_args
+    assert kwargs["data"]["email"] == EMAIL_PLACEHOLDER
 
 
 @patch("mann_kendall.ui.feedback.requests.post")

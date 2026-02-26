@@ -8,6 +8,7 @@ from mann_kendall.utils.logging_config import get_logger
 logger = get_logger(__name__)
 
 FORMSPREE_ENDPOINT = "https://formspree.io/f/xeelvjdr"
+EMAIL_PLACEHOLDER = "no-reply@mannkendall.app"
 
 
 def create_feedback_section() -> None:
@@ -50,7 +51,7 @@ def create_feedback_section() -> None:
                 else:
                     payload = {
                         "name": name if name.strip() else "Anonymous",
-                        "email": email if email.strip() else "Not provided",
+                        "email": email if email.strip() else EMAIL_PLACEHOLDER,
                         "category": category,
                         "message": message,
                         "_subject": f"MKA Feedback: {category}",  # Custom email subject
