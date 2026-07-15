@@ -12,7 +12,7 @@ plotly==6.7.0
 pluggy==1.0.0
 pre_commit==4.6.0
 protobuf==6.33.6
-pyarrow==14.0.1
+pyarrow==25.0.0
 pydeck==0.9.2
 pytest==8.4.2
 pytest-cov==7.1.0
