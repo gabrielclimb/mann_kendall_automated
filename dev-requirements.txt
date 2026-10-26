@@ -19,4 +19,4 @@ pytest-cov==7.1.0
 scipy==1.15.3
 streamlit==1.65.0
 xlrd==1.2.0
-XlsxWriter==3.2.9
+XlsxWriter==3.3.0
